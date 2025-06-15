@@ -1,3 +1,65 @@
+/* Theme Toggle */
+.themeToggle {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 1000;
+}
+
+.themeToggle:hover {
+  border-color: #000;
+}
+
+[data-theme="dark"] .themeToggle {
+  background: #1a1a1a;
+  border-color: #333;
+}
+
+[data-theme="dark"] .themeToggle:hover {
+  border-color: #666;
+}
+
+.themeToggleButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.themeToggleButton:hover {
+  border-color: #000;
+  color: #000;
+  background: #fafafa;
+}
+
+[data-theme="dark"] .themeToggleButton {
+  border-color: #333;
+  color: #999;
+}
+
+[data-theme="dark"] .themeToggleButton:hover {
+  border-color: #666;
+  color: #fff;
+  background: #1a1a1a;
+}
+
 /* Login Page */
 .loginContainer {
   min-height: 100vh;
@@ -8,6 +70,10 @@
   padding: 20px;
 }
 
+[data-theme="dark"] .loginContainer {
+  background: #000;
+}
+
 .loginCard {
   background: white;
   border-radius: 12px;
@@ -16,6 +82,11 @@
   padding: 48px 40px;
   max-width: 400px;
   width: 100%;
+}
+
+[data-theme="dark"] .loginCard {
+  background: #111;
+  border-color: #333;
 }
 
 .loginHeader {
@@ -36,10 +107,18 @@
   letter-spacing: -0.02em;
 }
 
+[data-theme="dark"] .loginTitle {
+  color: #fff;
+}
+
 .loginSubtitle {
   font-size: 14px;
   color: #666;
   margin: 0;
+}
+
+[data-theme="dark"] .loginSubtitle {
+  color: #999;
 }
 
 .loginForm {
@@ -65,6 +144,15 @@
   background: #111;
 }
 
+[data-theme="dark"] .loginButton {
+  background: #fff;
+  color: #000;
+}
+
+[data-theme="dark"] .loginButton:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
 .loginButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
@@ -76,6 +164,10 @@
   background: #fafafa;
 }
 
+[data-theme="dark"] .dashboard {
+  background: #000;
+}
+
 .header {
   background: white;
   border-bottom: 1px solid #eaeaea;
@@ -83,6 +175,11 @@
   position: sticky;
   top: 0;
   z-index: 100;
+}
+
+[data-theme="dark"] .header {
+  background: #111;
+  border-bottom-color: #333;
 }
 
 .headerContent {
@@ -108,10 +205,18 @@
   letter-spacing: -0.02em;
 }
 
+[data-theme="dark"] .headerTitle {
+  color: #fff;
+}
+
 .headerSubtitle {
   font-size: 13px;
   color: #666;
   margin: 2px 0 0;
+}
+
+[data-theme="dark"] .headerSubtitle {
+  color: #999;
 }
 
 .headerRight {
@@ -137,6 +242,16 @@
 .logoutButton:hover {
   border-color: #000;
   color: #000;
+}
+
+[data-theme="dark"] .logoutButton {
+  border-color: #333;
+  color: #999;
+}
+
+[data-theme="dark"] .logoutButton:hover {
+  border-color: #666;
+  color: #fff;
 }
 
 /* Container */
@@ -180,13 +295,27 @@
   transition: all 0.2s ease;
 }
 
+[data-theme="dark"] .searchInput {
+  background: #1a1a1a;
+  border-color: #333;
+  color: #fff;
+}
+
 .searchInput:focus {
   outline: none;
   border-color: #000;
 }
 
+[data-theme="dark"] .searchInput:focus {
+  border-color: #666;
+}
+
 .searchInput::placeholder {
   color: #999;
+}
+
+[data-theme="dark"] .searchInput::placeholder {
+  color: #666;
 }
 
 .createButton {
@@ -209,6 +338,15 @@
   background: #111;
 }
 
+[data-theme="dark"] .createButton {
+  background: #fff;
+  color: #000;
+}
+
+[data-theme="dark"] .createButton:hover {
+  background: #f0f0f0;
+}
+
 /* Form Elements */
 .formGroup {
   display: flex;
@@ -220,6 +358,10 @@
   font-size: 14px;
   font-weight: 500;
   color: #000;
+}
+
+[data-theme="dark"] .formGroup label {
+  color: #fff;
 }
 
 .input,
@@ -234,10 +376,22 @@
   transition: all 0.2s ease;
 }
 
+[data-theme="dark"] .input,
+[data-theme="dark"] .textarea {
+  background: #1a1a1a;
+  border-color: #333;
+  color: #fff;
+}
+
 .input:focus,
 .textarea:focus {
   outline: none;
   border-color: #000;
+}
+
+[data-theme="dark"] .input:focus,
+[data-theme="dark"] .textarea:focus {
+  border-color: #666;
 }
 
 .input:disabled {
@@ -256,6 +410,10 @@
 .hint {
   font-size: 12px;
   color: #666;
+}
+
+[data-theme="dark"] .hint {
+  color: #999;
 }
 
 /* Modal */
@@ -291,6 +449,11 @@
   animation: slideUp 0.2s ease;
 }
 
+[data-theme="dark"] .modalCard {
+  background: #111;
+  border-color: #333;
+}
+
 @keyframes slideUp {
   from {
     opacity: 0;
@@ -310,12 +473,20 @@
   border-bottom: 1px solid #eaeaea;
 }
 
+[data-theme="dark"] .modalHeader {
+  border-bottom-color: #333;
+}
+
 .modalHeader h2 {
   font-size: 18px;
   font-weight: 600;
   color: #000;
   margin: 0;
   letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] .modalHeader h2 {
+  color: #fff;
 }
 
 .closeButton {
@@ -336,6 +507,15 @@
 .closeButton:hover {
   background: #fafafa;
   color: #000;
+}
+
+[data-theme="dark"] .closeButton {
+  color: #999;
+}
+
+[data-theme="dark"] .closeButton:hover {
+  background: #1a1a1a;
+  color: #fff;
 }
 
 .modalForm {
@@ -369,6 +549,16 @@
   color: #000;
 }
 
+[data-theme="dark"] .cancelButton {
+  border-color: #333;
+  color: #999;
+}
+
+[data-theme="dark"] .cancelButton:hover {
+  border-color: #666;
+  color: #fff;
+}
+
 .submitButton {
   padding: 10px 20px;
   background: #000;
@@ -383,6 +573,15 @@
 
 .submitButton:hover:not(:disabled) {
   background: #111;
+}
+
+[data-theme="dark"] .submitButton {
+  background: #fff;
+  color: #000;
+}
+
+[data-theme="dark"] .submitButton:hover:not(:disabled) {
+  background: #f0f0f0;
 }
 
 .submitButton:disabled {
@@ -403,9 +602,18 @@
   text-align: center;
 }
 
+[data-theme="dark"] .emptyState {
+  background: #111;
+  border-color: #333;
+}
+
 .emptyState svg {
   color: #999;
   margin-bottom: 16px;
+}
+
+[data-theme="dark"] .emptyState svg {
+  color: #666;
 }
 
 .emptyState h3 {
@@ -415,10 +623,18 @@
   margin: 0 0 8px;
 }
 
+[data-theme="dark"] .emptyState h3 {
+  color: #fff;
+}
+
 .emptyState p {
   font-size: 14px;
   color: #666;
   margin: 0;
+}
+
+[data-theme="dark"] .emptyState p {
+  color: #999;
 }
 
 .grid {
@@ -439,9 +655,18 @@
   gap: 16px;
 }
 
+[data-theme="dark"] .card {
+  background: #111;
+  border-color: #333;
+}
+
 .card:hover {
   border-color: #ccc;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+}
+
+[data-theme="dark"] .card:hover {
+  border-color: #555;
 }
 
 .cardHeader {
@@ -464,6 +689,10 @@
   color: #000;
   margin: 0;
   letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] .cardTitle h3 {
+  color: #fff;
 }
 
 .statusBadge {
@@ -502,11 +731,23 @@
   color: #000;
 }
 
+[data-theme="dark"] .subdomainLink {
+  color: #999;
+}
+
+[data-theme="dark"] .subdomainLink:hover {
+  color: #fff;
+}
+
 .cardDescription {
   font-size: 14px;
   color: #666;
   line-height: 1.5;
   margin: 0;
+}
+
+[data-theme="dark"] .cardDescription {
+  color: #999;
 }
 
 .cardMeta {
@@ -515,6 +756,10 @@
   justify-content: space-between;
   padding-top: 12px;
   border-top: 1px solid #f5f5f5;
+}
+
+[data-theme="dark"] .cardMeta {
+  border-top-color: #2a2a2a;
 }
 
 .metaDate {
@@ -548,6 +793,17 @@
   border-color: #000;
   color: #000;
   background: #fafafa;
+}
+
+[data-theme="dark"] .actionButton {
+  border-color: #333;
+  color: #999;
+}
+
+[data-theme="dark"] .actionButton:hover {
+  border-color: #666;
+  color: #fff;
+  background: #1a1a1a;
 }
 
 .deleteButton {

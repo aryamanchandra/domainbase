@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Plus, LogOut, Edit2, Trash2, ExternalLink, 
-  Globe, CheckCircle, XCircle, Search, Filter 
+  Globe, CheckCircle, XCircle, Search, Moon, Sun
 } from 'lucide-react';
 import styles from './page.module.css';
 
@@ -30,6 +30,7 @@ export default function Home() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -42,12 +43,32 @@ export default function Home() {
 
   useEffect(() => {
     const savedToken = localStorage.getItem('token');
+    const savedTheme = localStorage.getItem('theme');
+    
     if (savedToken) {
       setToken(savedToken);
       setIsLoggedIn(true);
       fetchSubdomains(savedToken);
     }
+
+    if (savedTheme === 'dark') {
+      setDarkMode(true);
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
   }, []);
+
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    
+    if (newMode) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,6 +207,10 @@ export default function Home() {
   if (!isLoggedIn) {
     return (
       <div className={styles.loginContainer}>
+        <button onClick={toggleDarkMode} className={styles.themeToggle}>
+          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+        
         <div className={styles.loginCard}>
           <div className={styles.loginHeader}>
             <Globe className={styles.loginIcon} size={40} />
@@ -249,6 +274,9 @@ export default function Home() {
             </div>
           </div>
           <div className={styles.headerRight}>
+            <button onClick={toggleDarkMode} className={styles.themeToggleButton}>
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
             <button onClick={handleLogout} className={styles.logoutButton}>
               <LogOut size={18} />
               <span>Logout</span>
