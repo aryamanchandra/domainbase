@@ -16,6 +16,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: #000;
+  background: #fafafa;
 }
 
 a {
@@ -23,3 +25,30 @@ a {
   text-decoration: none;
 }
 
+button {
+  font-family: inherit;
+}
+
+/* Scrollbar Styling (Webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(0, 0, 0, 0.1);
+}
