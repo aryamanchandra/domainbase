@@ -14,19 +14,23 @@
   cursor: pointer;
   transition: all 0.2s ease;
   z-index: 1000;
+  color: #000;
 }
 
 .themeToggle:hover {
   border-color: #000;
+  background: #fafafa;
 }
 
 [data-theme="dark"] .themeToggle {
   background: #1a1a1a;
   border-color: #333;
+  color: #fff;
 }
 
 [data-theme="dark"] .themeToggle:hover {
   border-color: #666;
+  background: #222;
 }
 
 .themeToggleButton {
