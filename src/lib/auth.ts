@@ -13,8 +13,8 @@ export async function verifyPassword(password: string, hashedPassword: string): 
   return bcrypt.compare(password, hashedPassword);
 }
 
-export function generateToken(userId: string, username: string): string {
-  return jwt.sign({ userId, username }, JWT_SECRET, { expiresIn: '7d' });
+export function generateToken(payload: { userId?: string; username: string }): string {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '7d' });
 }
 
 export function verifyToken(token: string): any {
@@ -31,18 +31,80 @@ export async function getUser(username: string): Promise<User | null> {
   return user;
 }
 
-export async function createUser(username: string, password: string, role: 'admin' | 'user' = 'user'): Promise<User> {
+export async function createUser(
+  username: string, 
+  password: string, 
+  role: 'admin' | 'user' = 'user',
+  oauthData?: {
+    email?: string;
+    name?: string;
+    picture?: string;
+    googleId?: string;
+  }
+): Promise<User> {
   const db = await getDb();
-  const hashedPassword = await hashPassword(password);
+  const hashedPassword = password ? await hashPassword(password) : '';
   
   const user: User = {
     username,
     password: hashedPassword,
     role,
     createdAt: new Date(),
+    ...oauthData,
   };
   
   await db.collection('users').insertOne(user);
+  return user;
+}
+
+export async function findOrCreateOAuthUser(
+  email: string,
+  userData: {
+    name?: string;
+    picture?: string;
+    googleId: string;
+  }
+): Promise<User> {
+  const db = await getDb();
+  
+  // Try to find user by googleId first
+  let user = await db.collection<User>('users').findOne({ googleId: userData.googleId });
+  
+  if (!user) {
+    // Try to find by email
+    user = await db.collection<User>('users').findOne({ email });
+    
+    if (!user) {
+      // Create new user
+      const newUser: User = {
+        username: email,
+        email,
+        name: userData.name,
+        picture: userData.picture,
+        googleId: userData.googleId,
+        password: '', // No password for OAuth users
+        role: 'user',
+        createdAt: new Date(),
+      };
+      
+      await db.collection('users').insertOne(newUser);
+      return newUser;
+    } else {
+      // Update existing user with Google ID
+      await db.collection('users').updateOne(
+        { email },
+        { 
+          $set: { 
+            googleId: userData.googleId,
+            picture: userData.picture,
+            name: userData.name || user.name,
+          }
+        }
+      );
+      user.googleId = userData.googleId;
+    }
+  }
+  
   return user;
 }
 

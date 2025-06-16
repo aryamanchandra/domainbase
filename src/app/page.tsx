@@ -40,15 +40,37 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
-    const savedTheme = localStorage.getItem('theme');
+    // Check for token in URL (from OAuth callback)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token');
+    const urlError = urlParams.get('error');
     
+    if (urlError) {
+      setError('Authentication failed. Please try again.');
+      // Clean URL
+      window.history.replaceState({}, '', '/');
+    }
+    
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
+      setToken(urlToken);
+      setIsLoggedIn(true);
+      fetchSubdomains(urlToken);
+      // Clean URL
+      window.history.replaceState({}, '', '/');
+      return;
+    }
+
+    // Check for saved token
+    const savedToken = localStorage.getItem('token');
     if (savedToken) {
       setToken(savedToken);
       setIsLoggedIn(true);
       fetchSubdomains(savedToken);
     }
 
+    // Check theme
+    const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setDarkMode(true);
       document.documentElement.setAttribute('data-theme', 'dark');

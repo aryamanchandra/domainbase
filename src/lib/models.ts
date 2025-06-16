@@ -18,7 +18,11 @@ export interface Subdomain {
 export interface User {
   _id?: string;
   username: string;
-  password: string; // hashed
+  email?: string;
+  name?: string;
+  picture?: string;
+  googleId?: string;
+  password: string; // hashed (optional for OAuth users)
   role: 'admin' | 'user';
   createdAt: Date;
 }
