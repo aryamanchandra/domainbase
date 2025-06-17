@@ -20,6 +20,20 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // Check for required environment variables
+    if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+      console.error('Missing NEXT_PUBLIC_GOOGLE_CLIENT_ID');
+      throw new Error('Google OAuth not configured: Missing Client ID');
+    }
+
+    if (!process.env.GOOGLE_CLIENT_SECRET) {
+      console.error('Missing GOOGLE_CLIENT_SECRET');
+      throw new Error('Google OAuth not configured: Missing Client Secret');
+    }
+
+    const redirectUri = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/callback/google`;
+    console.log('OAuth Exchange - Redirect URI:', redirectUri);
+
     // Exchange code for access token
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -28,15 +42,17 @@ export async function GET(request: NextRequest) {
       },
       body: new URLSearchParams({
         code,
-        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
-        client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-        redirect_uri: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/callback/google`,
+        client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        redirect_uri: redirectUri,
         grant_type: 'authorization_code',
       }),
     });
 
     if (!tokenResponse.ok) {
-      throw new Error('Failed to exchange code for token');
+      const errorData = await tokenResponse.text();
+      console.error('Token exchange failed:', tokenResponse.status, errorData);
+      throw new Error(`Failed to exchange code for token: ${tokenResponse.status} - ${errorData}`);
     }
 
     const tokens = await tokenResponse.json();
