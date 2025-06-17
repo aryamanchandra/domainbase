@@ -43,6 +43,17 @@ export default function SubdomainPage() {
         }
         
         setData(result.subdomain);
+        
+        // Track page view for analytics
+        fetch('/api/analytics/track', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subdomain,
+            path: window.location.pathname,
+          }),
+        }).catch(err => console.error('Analytics tracking failed:', err));
+        
       } catch (err) {
         setError('Failed to load subdomain');
         console.error(err);
