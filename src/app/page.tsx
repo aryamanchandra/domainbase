@@ -46,10 +46,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [detailsView, setDetailsView] = useState<{
-    subdomain: Subdomain;
-    activeTab: 'analytics' | 'dns' | 'verification';
-  } | null>(null);
+  const [currentView, setCurrentView] = useState<'list' | 'details'>('list');
+  const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
+  const [activeTab, setActiveTab] = useState<'analytics' | 'dns' | 'verification'>('analytics');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -195,8 +195,6 @@ export default function Home() {
   };
 
   const handleDelete = async (subdomain: string) => {
-    if (!confirm(`Are you sure you want to delete ${subdomain}?`)) return;
-
     try {
       const response = await fetch(`/api/subdomains/${subdomain}`, {
         method: 'DELETE',
@@ -207,10 +205,26 @@ export default function Home() {
 
       if (response.ok) {
         fetchSubdomains(token);
+        setDeleteConfirm(null);
+        if (currentView === 'details' && selectedSubdomain?.subdomain === subdomain) {
+          setCurrentView('list');
+          setSelectedSubdomain(null);
+        }
       }
     } catch (err) {
       console.error('Failed to delete subdomain', err);
     }
+  };
+
+  const openDetails = (sub: Subdomain) => {
+    setSelectedSubdomain(sub);
+    setActiveTab('analytics');
+    setCurrentView('details');
+  };
+
+  const closeDetails = () => {
+    setCurrentView('list');
+    setSelectedSubdomain(null);
   };
 
   const handleEdit = (subdomain: Subdomain) => {
@@ -282,6 +296,83 @@ export default function Home() {
           <p className={styles.loginFooter}>
             Secured by Google OAuth 2.0
           </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (currentView === 'details' && selectedSubdomain) {
+    return (
+      <div className={styles.dashboard}>
+        <header className={styles.header}>
+          <div className={styles.headerContent}>
+            <div className={styles.headerLeft}>
+              <button onClick={closeDetails} className={styles.backButton}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <div>
+                <h1 className={styles.headerTitle}>{selectedSubdomain.title}</h1>
+                <p className={styles.headerSubtitle}>
+                  {selectedSubdomain.subdomain}.aryamanchandra.com
+                </p>
+              </div>
+            </div>
+            <div className={styles.headerRight}>
+              <button onClick={toggleDarkMode} className={styles.themeToggleButton} aria-label="Toggle theme">
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button onClick={handleLogout} className={styles.logoutButton}>
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className={styles.detailsPage}>
+          <div className={styles.detailsTabs}>
+            <button
+              className={activeTab === 'analytics' ? styles.activeTab : ''}
+              onClick={() => setActiveTab('analytics')}
+            >
+              Analytics
+            </button>
+            <button
+              className={activeTab === 'dns' ? styles.activeTab : ''}
+              onClick={() => setActiveTab('dns')}
+            >
+              DNS Checker
+            </button>
+            <button
+              className={activeTab === 'verification' ? styles.activeTab : ''}
+              onClick={() => setActiveTab('verification')}
+            >
+              Verification
+            </button>
+          </div>
+
+          <div className={styles.detailsContent}>
+            {activeTab === 'analytics' && (
+              <AnalyticsDashboard 
+                subdomain={selectedSubdomain.subdomain}
+                token={token}
+              />
+            )}
+            {activeTab === 'dns' && (
+              <DNSChecker 
+                subdomain={selectedSubdomain.subdomain}
+                token={token}
+              />
+            )}
+            {activeTab === 'verification' && (
+              <VerificationWizard 
+                subdomain={selectedSubdomain.subdomain}
+                token={token}
+              />
+            )}
+          </div>
         </div>
       </div>
     );
@@ -492,7 +583,7 @@ export default function Home() {
                   
                   <div className={styles.cardActions}>
                     <button 
-                      onClick={() => setDetailsView({ subdomain: sub, activeTab: 'analytics' })} 
+                      onClick={() => openDetails(sub)} 
                       className={styles.detailsButton}
                     >
                       <BarChart3 size={16} />
@@ -502,7 +593,10 @@ export default function Home() {
                       <Edit2 size={16} />
                       <span>Edit</span>
                     </button>
-                    <button onClick={() => handleDelete(sub.subdomain)} className={styles.deleteButton}>
+                    <button 
+                      onClick={() => setDeleteConfirm({ subdomain: sub.subdomain, title: sub.title })} 
+                      className={styles.deleteButton}
+                    >
                       <Trash2 size={16} />
                       <span>Delete</span>
                     </button>
@@ -514,65 +608,37 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Details Modal */}
-      {detailsView && (
-        <div className={styles.detailsModal} onClick={() => setDetailsView(null)}>
-          <div className={styles.detailsPanel} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.detailsHeader}>
-              <div>
-                <h2>{detailsView.subdomain.title}</h2>
-                <p className={styles.detailsSubdomain}>
-                  {detailsView.subdomain.subdomain}.aryamanchandra.com
-                </p>
-              </div>
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className={styles.confirmModal} onClick={() => setDeleteConfirm(null)}>
+          <div className={styles.confirmCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirmIcon}>
+              <Trash2 size={24} color="#ff0080" />
+            </div>
+            <h3>Delete Subdomain</h3>
+            <p>
+              Are you sure you want to delete <strong>{deleteConfirm.title}</strong>?
+            </p>
+            <p className={styles.confirmSubtext}>
+              {deleteConfirm.subdomain}.aryamanchandra.com
+            </p>
+            <p className={styles.confirmWarning}>
+              This action cannot be undone. All data and analytics for this subdomain will be permanently deleted.
+            </p>
+            <div className={styles.confirmActions}>
               <button 
-                onClick={() => setDetailsView(null)} 
-                className={styles.detailsClose}
+                onClick={() => setDeleteConfirm(null)} 
+                className={styles.confirmCancel}
               >
-                <X size={20} />
+                Cancel
               </button>
-            </div>
-
-            <div className={styles.detailsTabs}>
-              <button
-                className={detailsView.activeTab === 'analytics' ? styles.activeTab : ''}
-                onClick={() => setDetailsView({ ...detailsView, activeTab: 'analytics' })}
+              <button 
+                onClick={() => handleDelete(deleteConfirm.subdomain)} 
+                className={styles.confirmDelete}
               >
-                Analytics
+                <Trash2 size={16} />
+                <span>Delete Subdomain</span>
               </button>
-              <button
-                className={detailsView.activeTab === 'dns' ? styles.activeTab : ''}
-                onClick={() => setDetailsView({ ...detailsView, activeTab: 'dns' })}
-              >
-                DNS Checker
-              </button>
-              <button
-                className={detailsView.activeTab === 'verification' ? styles.activeTab : ''}
-                onClick={() => setDetailsView({ ...detailsView, activeTab: 'verification' })}
-              >
-                Verification
-              </button>
-            </div>
-
-            <div className={styles.detailsContent}>
-              {detailsView.activeTab === 'analytics' && (
-                <AnalyticsDashboard 
-                  subdomain={detailsView.subdomain.subdomain}
-                  token={token}
-                />
-              )}
-              {detailsView.activeTab === 'dns' && (
-                <DNSChecker 
-                  subdomain={detailsView.subdomain.subdomain}
-                  token={token}
-                />
-              )}
-              {detailsView.activeTab === 'verification' && (
-                <VerificationWizard 
-                  subdomain={detailsView.subdomain.subdomain}
-                  token={token}
-                />
-              )}
             </div>
           </div>
         </div>
