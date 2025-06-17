@@ -3,9 +3,26 @@
 import { useState, useEffect } from 'react';
 import { 
   Plus, LogOut, Edit2, Trash2, ExternalLink, 
-  Globe, CheckCircle, XCircle, Search, Moon, Sun
+  Globe, CheckCircle, XCircle, Search, Moon, Sun, BarChart3, X
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import styles from './page.module.css';
+
+// Dynamic imports for heavy components
+const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard'), {
+  ssr: false,
+  loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading analytics...</div>
+});
+
+const DNSChecker = dynamic(() => import('@/components/DNSChecker'), {
+  ssr: false,
+  loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading DNS checker...</div>
+});
+
+const VerificationWizard = dynamic(() => import('@/components/VerificationWizard'), {
+  ssr: false,
+  loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading verification wizard...</div>
+});
 
 interface Subdomain {
   _id: string;
@@ -29,6 +46,10 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
+  const [detailsView, setDetailsView] = useState<{
+    subdomain: Subdomain;
+    activeTab: 'analytics' | 'dns' | 'verification';
+  } | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -470,6 +491,13 @@ export default function Home() {
                   </div>
                   
                   <div className={styles.cardActions}>
+                    <button 
+                      onClick={() => setDetailsView({ subdomain: sub, activeTab: 'analytics' })} 
+                      className={styles.detailsButton}
+                    >
+                      <BarChart3 size={16} />
+                      <span>Details</span>
+                    </button>
                     <button onClick={() => handleEdit(sub)} className={styles.actionButton}>
                       <Edit2 size={16} />
                       <span>Edit</span>
@@ -485,6 +513,70 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {/* Details Modal */}
+      {detailsView && (
+        <div className={styles.detailsModal} onClick={() => setDetailsView(null)}>
+          <div className={styles.detailsPanel} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.detailsHeader}>
+              <div>
+                <h2>{detailsView.subdomain.title}</h2>
+                <p className={styles.detailsSubdomain}>
+                  {detailsView.subdomain.subdomain}.aryamanchandra.com
+                </p>
+              </div>
+              <button 
+                onClick={() => setDetailsView(null)} 
+                className={styles.detailsClose}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className={styles.detailsTabs}>
+              <button
+                className={detailsView.activeTab === 'analytics' ? styles.activeTab : ''}
+                onClick={() => setDetailsView({ ...detailsView, activeTab: 'analytics' })}
+              >
+                Analytics
+              </button>
+              <button
+                className={detailsView.activeTab === 'dns' ? styles.activeTab : ''}
+                onClick={() => setDetailsView({ ...detailsView, activeTab: 'dns' })}
+              >
+                DNS Checker
+              </button>
+              <button
+                className={detailsView.activeTab === 'verification' ? styles.activeTab : ''}
+                onClick={() => setDetailsView({ ...detailsView, activeTab: 'verification' })}
+              >
+                Verification
+              </button>
+            </div>
+
+            <div className={styles.detailsContent}>
+              {detailsView.activeTab === 'analytics' && (
+                <AnalyticsDashboard 
+                  subdomain={detailsView.subdomain.subdomain}
+                  token={token}
+                />
+              )}
+              {detailsView.activeTab === 'dns' && (
+                <DNSChecker 
+                  subdomain={detailsView.subdomain.subdomain}
+                  token={token}
+                />
+              )}
+              {detailsView.activeTab === 'verification' && (
+                <VerificationWizard 
+                  subdomain={detailsView.subdomain.subdomain}
+                  token={token}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
