@@ -1379,6 +1379,12 @@
   flex: 1;
   margin-left: 280px;
   min-height: 100vh;
+  transition: margin-left 0.3s ease;
+}
+
+/* Adjust for collapsed sidebar - using CSS variable */
+[data-sidebar-collapsed="true"] .mainContent {
+  margin-left: 80px;
 }
 
 @media (max-width: 768px) {

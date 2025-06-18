@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Plus, Edit2, Trash2, ExternalLink, 
-  Globe, CheckCircle, XCircle, Search, BarChart3, Moon, Sun
+  Globe, CheckCircle, XCircle, Search, BarChart3
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
@@ -57,7 +57,6 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<'subdomains' | 'analytics' | 'dns' | 'verification'>('subdomains');
   const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -138,27 +137,6 @@ export default function Home() {
       localStorage.setItem('theme', 'light');
     }
   };
-
-  const toggleSidebarCollapse = () => {
-    const newState = !sidebarCollapsed;
-    setSidebarCollapsed(newState);
-    localStorage.setItem('sidebarCollapsed', String(newState));
-    
-    if (newState) {
-      document.documentElement.setAttribute('data-sidebar-collapsed', 'true');
-    } else {
-      document.documentElement.removeAttribute('data-sidebar-collapsed');
-    }
-  };
-
-  // Load sidebar state
-  useEffect(() => {
-    const savedCollapsed = localStorage.getItem('sidebarCollapsed');
-    if (savedCollapsed === 'true') {
-      setSidebarCollapsed(true);
-      document.documentElement.setAttribute('data-sidebar-collapsed', 'true');
-    }
-  }, []);
 
   const handleGoogleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -349,8 +327,6 @@ export default function Home() {
         currentView={currentView}
         onNavigate={setCurrentView}
         userInfo={userInfo}
-        isCollapsed={sidebarCollapsed}
-        onToggleCollapse={toggleSidebarCollapse}
       />
 
       <main className={styles.mainContent}>

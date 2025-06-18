@@ -44,9 +44,10 @@ export default function DNSPropagationMap({ subdomain, token }: Props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<PropagationData | null>(null);
   const [selectedMarker, setSelectedMarker] = useState<PropagationResult | null>(null);
+  const [customDomain, setCustomDomain] = useState('');
 
   const checkPropagation = async () => {
-    const domain = `${subdomain}.aryamanchandra.com`;
+    const domain = customDomain || `${subdomain}.aryamanchandra.com`;
     setLoading(true);
     setSelectedMarker(null);
 
@@ -103,6 +104,24 @@ export default function DNSPropagationMap({ subdomain, token }: Props) {
         <div>
           <h3>Global DNS Propagation</h3>
           <p>Check if your DNS records have propagated worldwide</p>
+        </div>
+      </div>
+
+      <div className={styles.inputSection}>
+        <div className={styles.inputWrapper}>
+          <GlobeIcon size={18} className={styles.inputIcon} />
+          <input
+            type="text"
+            placeholder={`${subdomain}.aryamanchandra.com`}
+            value={customDomain}
+            onChange={(e) => setCustomDomain(e.target.value)}
+            className={styles.domainInput}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !loading) {
+                checkPropagation();
+              }
+            }}
+          />
         </div>
         <button 
           onClick={checkPropagation} 

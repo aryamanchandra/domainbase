@@ -9,7 +9,11 @@
   display: flex;
   flex-direction: column;
   z-index: 1000;
-  transition: transform 0.3s ease;
+  transition: width 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 80px;
 }
 
 [data-theme="dark"] .sidebar {
@@ -22,6 +26,43 @@
   flex-direction: column;
   height: 100%;
   padding: 24px 0;
+  position: relative;
+}
+
+/* Collapse Toggle */
+.collapseToggle {
+  position: absolute;
+  right: -12px;
+  top: 20px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #666;
+  z-index: 10;
+  transition: all 0.2s;
+}
+
+.collapseToggle:hover {
+  background: #f5f5f5;
+  color: #000;
+  transform: scale(1.1);
+}
+
+[data-theme="dark"] .collapseToggle {
+  background: #111;
+  border-color: #333;
+  color: #999;
+}
+
+[data-theme="dark"] .collapseToggle:hover {
+  background: #1a1a1a;
+  color: #fff;
 }
 
 /* Logo */
@@ -59,10 +100,18 @@
   font-weight: 600;
   color: #000;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
 }
 
 [data-theme="dark"] .logoText {
   color: #fff;
+}
+
+.collapsed .logoText {
+  opacity: 0;
+  width: 0;
 }
 
 /* Navigation */
@@ -87,6 +136,17 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
+  white-space: nowrap;
+  justify-content: flex-start;
+}
+
+.collapsed .navItem {
+  justify-content: center;
+  padding: 12px;
+}
+
+.collapsed .navItem span {
+  display: none;
 }
 
 .navItem:hover {
@@ -139,6 +199,17 @@
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: left;
+  white-space: nowrap;
+  justify-content: flex-start;
+}
+
+.collapsed .settingItem {
+  justify-content: center;
+  padding: 12px;
+}
+
+.collapsed .settingItem span {
+  display: none;
 }
 
 .settingItem:hover {
@@ -178,6 +249,12 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  justify-content: flex-start;
+}
+
+.collapsed .userProfile {
+  justify-content: center;
+  padding: 8px 4px;
 }
 
 .userProfile:hover {
@@ -224,6 +301,11 @@
   flex: 1;
   text-align: left;
   min-width: 0;
+  overflow: hidden;
+}
+
+.collapsed .userInfo {
+  display: none;
 }
 
 .userName {
@@ -254,10 +336,15 @@
 .chevron {
   color: #999;
   transition: transform 0.2s;
+  flex-shrink: 0;
 }
 
 .chevron.open {
   transform: rotate(180deg);
+}
+
+.collapsed .chevron {
+  display: none;
 }
 
 /* User Menu */

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { 
   Globe, LogOut, Moon, Sun, Search, Shield, BarChart3, 
-  Home, Menu, X as CloseIcon, ChevronDown
+  Home, Menu, X as CloseIcon, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
@@ -18,6 +18,8 @@ interface Props {
     email?: string;
     picture?: string;
   };
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 export default function Sidebar({ 
@@ -26,7 +28,9 @@ export default function Sidebar({
   onLogout, 
   currentView,
   onNavigate,
-  userInfo
+  userInfo,
+  isCollapsed,
+  onToggleCollapse
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -49,14 +53,23 @@ export default function Sidebar({
       </button>
 
       {/* Sidebar */}
-      <div className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+      <div className={`${styles.sidebar} ${isOpen ? styles.open : ''} ${isCollapsed ? styles.collapsed : ''}`}>
         <div className={styles.sidebarContent}>
+          {/* Collapse Toggle Button */}
+          <button 
+            className={styles.collapseToggle}
+            onClick={onToggleCollapse}
+            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+          </button>
+
           {/* Logo */}
           <div className={styles.logo}>
             <div className={styles.logoIcon}>
               <Globe size={24} strokeWidth={2.5} />
             </div>
-            <span className={styles.logoText}>Subdomain Manager</span>
+            {!isCollapsed && <span className={styles.logoText}>Subdomain Manager</span>}
           </div>
 
           {/* Navigation */}
@@ -71,9 +84,10 @@ export default function Sidebar({
                     onNavigate(item.id);
                     setIsOpen(false);
                   }}
+                  title={isCollapsed ? item.label : undefined}
                 >
                   <Icon size={20} />
-                  <span>{item.label}</span>
+                  {!isCollapsed && <span>{item.label}</span>}
                 </button>
               );
             })}
@@ -87,60 +101,67 @@ export default function Sidebar({
             <button 
               className={styles.settingItem}
               onClick={onToggleDarkMode}
+              title={isCollapsed ? (darkMode ? 'Light Mode' : 'Dark Mode') : undefined}
             >
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-              <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              {!isCollapsed && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
             </button>
           </div>
 
           {/* User Profile */}
-          {userInfo && (
-            <div className={styles.userSection}>
-              <button 
-                className={styles.userProfile}
-                onClick={() => setShowUserMenu(!showUserMenu)}
-              >
-                {userInfo.picture ? (
-                  <img 
-                    src={userInfo.picture} 
-                    alt={userInfo.name || 'User'} 
-                    className={styles.userAvatar}
-                  />
-                ) : (
-                  <div className={styles.userAvatarPlaceholder}>
-                    {(userInfo.name || userInfo.email || 'U')[0].toUpperCase()}
-                  </div>
-                )}
-                <div className={styles.userInfo}>
-                  <div className={styles.userName}>
-                    {userInfo.name || 'User'}
-                  </div>
-                  <div className={styles.userEmail}>
-                    {userInfo.email || ''}
-                  </div>
-                </div>
-                <ChevronDown 
-                  size={16} 
-                  className={`${styles.chevron} ${showUserMenu ? styles.open : ''}`}
+          <div className={styles.userSection}>
+            <button 
+              className={styles.userProfile}
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              title={isCollapsed && userInfo ? (userInfo.name || userInfo.email) : undefined}
+            >
+              {userInfo?.picture ? (
+                <img 
+                  src={userInfo.picture} 
+                  alt={userInfo.name || 'User'} 
+                  className={styles.userAvatar}
                 />
-              </button>
-
-              {showUserMenu && (
-                <div className={styles.userMenu}>
-                  <button 
-                    className={styles.userMenuItem}
-                    onClick={() => {
-                      onLogout();
-                      setShowUserMenu(false);
-                    }}
-                  >
-                    <LogOut size={16} />
-                    <span>Logout</span>
-                  </button>
+              ) : (
+                <div className={styles.userAvatarPlaceholder}>
+                  {userInfo?.name ? userInfo.name[0].toUpperCase() : 
+                   userInfo?.email ? userInfo.email[0].toUpperCase() : 'U'}
                 </div>
               )}
-            </div>
-          )}
+              {!isCollapsed && (
+                <>
+                  <div className={styles.userInfo}>
+                    <div className={styles.userName}>
+                      {userInfo?.name || userInfo?.email || 'User'}
+                    </div>
+                    {userInfo?.email && userInfo?.name && (
+                      <div className={styles.userEmail}>
+                        {userInfo.email}
+                      </div>
+                    )}
+                  </div>
+                  <ChevronDown 
+                    size={16} 
+                    className={`${styles.chevron} ${showUserMenu ? styles.open : ''}`}
+                  />
+                </>
+              )}
+            </button>
+
+            {showUserMenu && (
+              <div className={styles.userMenu}>
+                <button 
+                  className={styles.userMenuItem}
+                  onClick={() => {
+                    onLogout();
+                    setShowUserMenu(false);
+                  }}
+                >
+                  <LogOut size={16} />
+                  {!isCollapsed && <span>Logout</span>}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
