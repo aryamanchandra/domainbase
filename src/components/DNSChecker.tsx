@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { Search, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import styles from './DNSChecker.module.css';
+
+const DNSPropagationMap = dynamic(() => import('./DNSPropagationMap'), {
+  ssr: false,
+  loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading propagation map...</div>
+});
 
 interface DNSRecord {
   type: string;
@@ -70,13 +76,16 @@ export default function DNSChecker({ subdomain, token }: Props) {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <h3>DNS Checker</h3>
-          <p>Check DNS records for your subdomain</p>
+    <>
+      <DNSPropagationMap subdomain={subdomain} token={token} />
+      
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <div>
+            <h3>DNS Records</h3>
+            <p>Check specific DNS record types for your subdomain</p>
+          </div>
         </div>
-      </div>
 
       <div className={styles.searchBar}>
         <div className={styles.inputWrapper}>
@@ -150,7 +159,8 @@ export default function DNSChecker({ subdomain, token }: Props) {
           <p>Enter a domain and click "Check DNS" to view records</p>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

@@ -12,6 +12,7 @@
   "dependencies": {
     "@auth/mongodb-adapter": "^3.10.0",
     "bcryptjs": "^2.4.3",
+    "d3-geo": "^3.1.1",
     "dns-lookup-promise": "^1.0.4",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.544.0",
@@ -20,6 +21,7 @@
     "next-auth": "^4.24.11",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "react-simple-maps": "^3.0.0",
     "recharts": "^3.2.1",
     "ua-parser-js": "^2.0.5"
   },
