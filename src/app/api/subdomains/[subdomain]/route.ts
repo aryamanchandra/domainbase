@@ -71,14 +71,14 @@ export async function PUT(
     if (metadata !== undefined) updateData.metadata = metadata;
 
     const result = await db.collection('subdomains').findOneAndUpdate(
-      { subdomain: params.subdomain },
+      { subdomain: params.subdomain, userId: decoded.userId },
       { $set: updateData },
       { returnDocument: 'after' }
     );
 
     if (!result) {
       return NextResponse.json(
-        { error: 'Subdomain not found' },
+        { error: 'Subdomain not found or you do not have permission to update it' },
         { status: 404 }
       );
     }
@@ -122,11 +122,11 @@ export async function DELETE(
     const db = await getDb();
     const result = await db
       .collection('subdomains')
-      .deleteOne({ subdomain: params.subdomain });
+      .deleteOne({ subdomain: params.subdomain, userId: decoded.userId });
 
     if (result.deletedCount === 0) {
       return NextResponse.json(
-        { error: 'Subdomain not found' },
+        { error: 'Subdomain not found or you do not have permission to delete it' },
         { status: 404 }
       );
     }

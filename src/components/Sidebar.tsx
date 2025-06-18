@@ -109,11 +109,7 @@ export default function Sidebar({
 
           {/* User Profile */}
           <div className={styles.userSection}>
-            <button 
-              className={styles.userProfile}
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              title={isCollapsed && userInfo ? (userInfo.name || userInfo.email) : undefined}
-            >
+            <div className={styles.userProfile}>
               {userInfo?.picture ? (
                 <img 
                   src={userInfo.picture} 
@@ -127,39 +123,27 @@ export default function Sidebar({
                 </div>
               )}
               {!isCollapsed && (
-                <>
-                  <div className={styles.userInfo}>
-                    <div className={styles.userName}>
-                      {userInfo?.name || userInfo?.email || 'User'}
-                    </div>
-                    {userInfo?.email && userInfo?.name && (
-                      <div className={styles.userEmail}>
-                        {userInfo.email}
-                      </div>
-                    )}
+                <div className={styles.userInfo}>
+                  <div className={styles.userName}>
+                    {userInfo?.name || userInfo?.email || 'User'}
                   </div>
-                  <ChevronDown 
-                    size={16} 
-                    className={`${styles.chevron} ${showUserMenu ? styles.open : ''}`}
-                  />
-                </>
+                  {userInfo?.email && userInfo?.name && (
+                    <div className={styles.userEmail}>
+                      {userInfo.email}
+                    </div>
+                  )}
+                </div>
               )}
-            </button>
+            </div>
 
-            {showUserMenu && (
-              <div className={styles.userMenu}>
-                <button 
-                  className={styles.userMenuItem}
-                  onClick={() => {
-                    onLogout();
-                    setShowUserMenu(false);
-                  }}
-                >
-                  <LogOut size={16} />
-                  {!isCollapsed && <span>Logout</span>}
-                </button>
-              </div>
-            )}
+            <button 
+              className={styles.logoutButton}
+              onClick={onLogout}
+              title={isCollapsed ? 'Logout' : undefined}
+            >
+              <LogOut size={20} />
+              {!isCollapsed && <span>Logout</span>}
+            </button>
           </div>
         </div>
       </div>

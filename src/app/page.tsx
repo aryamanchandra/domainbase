@@ -411,13 +411,6 @@ export default function Home() {
                 <span>Analytics</span>
               </button>
               <button
-                className={detailsTab === 'dns' ? styles.activeTab : ''}
-                onClick={() => setDetailsTab('dns')}
-              >
-                <Search size={18} />
-                <span>DNS</span>
-              </button>
-              <button
                 className={detailsTab === 'verification' ? styles.activeTab : ''}
                 onClick={() => setDetailsTab('verification')}
               >
@@ -429,9 +422,6 @@ export default function Home() {
             <div className={styles.detailsContent}>
               {detailsTab === 'analytics' && (
                 <AnalyticsDashboard subdomain={selectedSubdomain.subdomain} token={token} />
-              )}
-              {detailsTab === 'dns' && (
-                <DNSChecker subdomain={selectedSubdomain.subdomain} token={token} />
               )}
               {detailsTab === 'verification' && (
                 <VerificationWizard subdomain={selectedSubdomain.subdomain} token={token} />

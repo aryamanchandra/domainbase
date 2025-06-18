@@ -5,6 +5,7 @@ export interface Subdomain {
   description: string;
   content: string; // HTML content or page data
   customCss?: string;
+  userId: string; // User who owns this subdomain
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;

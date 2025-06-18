@@ -3,13 +3,30 @@ import { getDb } from '@/lib/mongodb';
 import { Subdomain } from '@/lib/models';
 import { verifyToken } from '@/lib/auth';
 
-// GET all subdomains
+// GET all subdomains for authenticated user
 export async function GET(request: NextRequest) {
   try {
+    // Check authentication
+    const token = request.headers.get('authorization')?.replace('Bearer ', '');
+    if (!token) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const decoded = verifyToken(token);
+    if (!decoded) {
+      return NextResponse.json(
+        { error: 'Invalid token' },
+        { status: 401 }
+      );
+    }
+
     const db = await getDb();
     const subdomains = await db
       .collection<Subdomain>('subdomains')
-      .find({})
+      .find({ userId: decoded.userId })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -79,6 +96,7 @@ export async function POST(request: NextRequest) {
       description: description || '',
       content: content || '',
       customCss: customCss || '',
+      userId: decoded.userId,
       createdAt: new Date(),
       updatedAt: new Date(),
       isActive: true,
