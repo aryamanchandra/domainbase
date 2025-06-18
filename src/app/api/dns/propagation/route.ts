@@ -22,6 +22,8 @@ const DNS_SERVERS: DNSServer[] = [
   { name: 'Cloudflare EU', location: 'Europe', coordinates: [2.3522, 48.8566], ip: '1.0.0.1', provider: 'Cloudflare' },
   
   // Asia
+  { name: 'Google India', location: 'India', coordinates: [78.9629, 20.5937], ip: '8.8.8.8', provider: 'Google' },
+  { name: 'Quad9 India', location: 'India', coordinates: [77.2090, 28.6139], ip: '9.9.9.9', provider: 'Quad9' },
   { name: 'Google Asia', location: 'Asia', coordinates: [104.1954, 35.8617], ip: '8.8.8.8', provider: 'Google' },
   { name: 'Cloudflare Asia', location: 'Singapore', coordinates: [103.8198, 1.3521], ip: '1.1.1.1', provider: 'Cloudflare' },
   

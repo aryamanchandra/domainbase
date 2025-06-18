@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { 
   Plus, Edit2, Trash2, ExternalLink, 
-  Globe, CheckCircle, XCircle, Search, BarChart3, Moon, Sun
+  Globe, CheckCircle, XCircle, Search, BarChart3, Moon, Sun, Shield
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
@@ -54,8 +54,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [currentView, setCurrentView] = useState<'subdomains' | 'analytics' | 'dns' | 'verification'>('subdomains');
+  const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details'>('subdomains');
   const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
+  const [detailsTab, setDetailsTab] = useState<'analytics' | 'dns' | 'verification'>('analytics');
   const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -261,7 +262,8 @@ export default function Home() {
 
   const openDetails = (sub: Subdomain) => {
     setSelectedSubdomain(sub);
-    setCurrentView('analytics');
+    setDetailsTab('analytics');
+    setCurrentView('details');
   };
 
   const handleEdit = (subdomain: Subdomain) => {
@@ -359,31 +361,82 @@ export default function Home() {
           <div className={styles.pageContainer}>
             <div className={styles.pageHeader}>
               <h1>DNS Checker</h1>
-              <p>Check DNS records and global propagation for your subdomains</p>
+              <p>Check DNS records and global propagation worldwide</p>
             </div>
             <DNSChecker subdomain="blog" token={token} />
           </div>
         )}
 
-        {/* Verification View */}
-        {currentView === 'verification' && (
+        {/* Subdomain Details View with Tabs */}
+        {currentView === 'details' && selectedSubdomain && (
           <div className={styles.pageContainer}>
-            <div className={styles.pageHeader}>
-              <h1>Verification Wizard</h1>
-              <p>Generate DNS verification records for popular services</p>
+            <div className={styles.detailsHeader}>
+              <div className={styles.detailsHeaderTop}>
+                <button 
+                  onClick={() => setCurrentView('subdomains')} 
+                  className={styles.backButton}
+                >
+                  ← Back to Subdomains
+                </button>
+              </div>
+              <div className={styles.detailsHeaderMain}>
+                <div className={styles.detailsInfo}>
+                  <h1>{selectedSubdomain.title}</h1>
+                  <a 
+                    href={`http://${selectedSubdomain.subdomain}.aryamanchandra.com`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.detailsUrl}
+                  >
+                    {selectedSubdomain.subdomain}.aryamanchandra.com
+                    <ExternalLink size={16} />
+                  </a>
+                </div>
+                <div className={styles.detailsBadge} data-active={selectedSubdomain.isActive}>
+                  {selectedSubdomain.isActive ? (
+                    <><CheckCircle size={16} /> Active</>
+                  ) : (
+                    <><XCircle size={16} /> Inactive</>
+                  )}
+                </div>
+              </div>
             </div>
-            <VerificationWizard subdomain="blog" token={token} />
-          </div>
-        )}
 
-        {/* Analytics View (for selected subdomain) */}
-        {currentView === 'analytics' && selectedSubdomain && (
-          <div className={styles.pageContainer}>
-            <div className={styles.pageHeader}>
-              <h1>{selectedSubdomain.title}</h1>
-              <p>{selectedSubdomain.subdomain}.aryamanchandra.com</p>
+            <div className={styles.detailsTabs}>
+              <button
+                className={detailsTab === 'analytics' ? styles.activeTab : ''}
+                onClick={() => setDetailsTab('analytics')}
+              >
+                <BarChart3 size={18} />
+                <span>Analytics</span>
+              </button>
+              <button
+                className={detailsTab === 'dns' ? styles.activeTab : ''}
+                onClick={() => setDetailsTab('dns')}
+              >
+                <Search size={18} />
+                <span>DNS</span>
+              </button>
+              <button
+                className={detailsTab === 'verification' ? styles.activeTab : ''}
+                onClick={() => setDetailsTab('verification')}
+              >
+                <Shield size={18} />
+                <span>Verification</span>
+              </button>
             </div>
-            <AnalyticsDashboard subdomain={selectedSubdomain.subdomain} token={token} />
+
+            <div className={styles.detailsContent}>
+              {detailsTab === 'analytics' && (
+                <AnalyticsDashboard subdomain={selectedSubdomain.subdomain} token={token} />
+              )}
+              {detailsTab === 'dns' && (
+                <DNSChecker subdomain={selectedSubdomain.subdomain} token={token} />
+              )}
+              {detailsTab === 'verification' && (
+                <VerificationWizard subdomain={selectedSubdomain.subdomain} token={token} />
+              )}
+            </div>
           </div>
         )}
 
@@ -438,63 +491,72 @@ export default function Home() {
             ) : (
               <div className={styles.grid}>
                 {filteredSubdomains.map((sub) => (
-                  <div key={sub._id} className={styles.card}>
-                    <div className={styles.cardHeader}>
-                      <div className={styles.cardTitle}>
-                        <h3>{sub.title}</h3>
+                  <div key={sub._id} className={styles.card} onClick={() => openDetails(sub)}>
+                    <div className={styles.cardTop}>
+                      <div className={styles.cardTitleRow}>
+                        <h3 className={styles.cardTitle}>{sub.title}</h3>
                         <div className={styles.statusBadge} data-active={sub.isActive}>
                           {sub.isActive ? (
-                            <><CheckCircle size={14} /> Active</>
+                            <><CheckCircle size={12} /> Active</>
                           ) : (
-                            <><XCircle size={14} /> Inactive</>
+                            <><XCircle size={12} /> Inactive</>
                           )}
                         </div>
                       </div>
+                      
+                      <div className={styles.subdomainUrl}>
+                        <Globe size={14} />
+                        <span>{sub.subdomain}.aryamanchandra.com</span>
+                      </div>
+                      
+                      {sub.description && (
+                        <p className={styles.cardDescription}>{sub.description}</p>
+                      )}
                     </div>
                     
-                    <a 
-                      href={`http://${sub.subdomain}.aryamanchandra.com`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.subdomainLink}
-                    >
-                      {sub.subdomain}.aryamanchandra.com
-                      <ExternalLink size={14} />
-                    </a>
-                    
-                    {sub.description && (
-                      <p className={styles.cardDescription}>{sub.description}</p>
-                    )}
-                    
-                    <div className={styles.cardMeta}>
-                      <span className={styles.metaDate}>
-                        {new Date(sub.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    
-                    <div className={styles.cardActions}>
-                      <button 
-                        onClick={() => openDetails(sub)} 
-                        className={styles.detailsButton}
-                      >
-                        <BarChart3 size={16} />
-                        <span>Analytics</span>
-                      </button>
-                      <button onClick={() => handleEdit(sub)} className={styles.actionButton}>
-                        <Edit2 size={16} />
-                        <span>Edit</span>
-                      </button>
-                      <button 
-                        onClick={() => setDeleteConfirm({ subdomain: sub.subdomain, title: sub.title })} 
-                        className={styles.deleteButton}
-                      >
-                        <Trash2 size={16} />
-                        <span>Delete</span>
-                      </button>
+                    <div className={styles.cardBottom}>
+                      <div className={styles.cardMeta}>
+                        <span className={styles.metaDate}>
+                          {new Date(sub.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                      
+                      <div className={styles.cardQuickActions}>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(sub);
+                          }} 
+                          className={styles.iconButton}
+                          title="Edit"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(`http://${sub.subdomain}.aryamanchandra.com`, '_blank');
+                          }} 
+                          className={styles.iconButton}
+                          title="Open"
+                        >
+                          <ExternalLink size={16} />
+                        </button>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirm({ subdomain: sub.subdomain, title: sub.title });
+                          }} 
+                          className={styles.iconButtonDanger}
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
