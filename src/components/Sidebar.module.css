@@ -1,0 +1,389 @@
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 280px;
+  background: white;
+  border-right: 1px solid #eaeaea;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .sidebar {
+  background: #111;
+  border-right-color: #222;
+}
+
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px 0;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 24px 24px;
+  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 24px;
+}
+
+[data-theme="dark"] .logo {
+  border-bottom-color: #222;
+}
+
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  background: #000;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+[data-theme="dark"] .logoIcon {
+  background: #fff;
+  color: #000;
+}
+
+.logoText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] .logoText {
+  color: #fff;
+}
+
+/* Navigation */
+.navigation {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 16px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.navItem:hover {
+  background: #f5f5f5;
+  color: #000;
+}
+
+.navItem.active {
+  background: #000;
+  color: #fff;
+}
+
+[data-theme="dark"] .navItem {
+  color: #999;
+}
+
+[data-theme="dark"] .navItem:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+[data-theme="dark"] .navItem.active {
+  background: #fff;
+  color: #000;
+}
+
+/* Spacer */
+.spacer {
+  flex: 1;
+}
+
+/* Settings */
+.settings {
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+.settingItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.settingItem:hover {
+  background: #f5f5f5;
+  color: #000;
+}
+
+[data-theme="dark"] .settingItem {
+  color: #999;
+}
+
+[data-theme="dark"] .settingItem:hover {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+/* User Section */
+.userSection {
+  padding: 0 16px;
+  border-top: 1px solid #eaeaea;
+  padding-top: 16px;
+  position: relative;
+}
+
+[data-theme="dark"] .userSection {
+  border-top-color: #222;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.userProfile:hover {
+  background: #f5f5f5;
+}
+
+[data-theme="dark"] .userProfile:hover {
+  background: #1a1a1a;
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eaeaea;
+}
+
+[data-theme="dark"] .userAvatar {
+  border-color: #333;
+}
+
+.userAvatarPlaceholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  border: 2px solid #eaeaea;
+}
+
+[data-theme="dark"] .userAvatarPlaceholder {
+  background: #fff;
+  color: #000;
+  border-color: #333;
+}
+
+.userInfo {
+  flex: 1;
+  text-align: left;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .userName {
+  color: #fff;
+}
+
+.userEmail {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .userEmail {
+  color: #999;
+}
+
+.chevron {
+  color: #999;
+  transition: transform 0.2s;
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+/* User Menu */
+.userMenu {
+  position: absolute;
+  bottom: 100%;
+  left: 16px;
+  right: 16px;
+  margin-bottom: 8px;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-theme="dark"] .userMenu {
+  background: #1a1a1a;
+  border-color: #333;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.userMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.userMenuItem:hover {
+  background: #f5f5f5;
+  color: #ff0080;
+}
+
+[data-theme="dark"] .userMenuItem {
+  color: #999;
+}
+
+[data-theme="dark"] .userMenuItem:hover {
+  background: #222;
+  color: #ff0080;
+}
+
+/* Mobile Menu Button */
+.mobileMenuButton {
+  display: none;
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000;
+  transition: all 0.2s;
+}
+
+.mobileMenuButton:hover {
+  background: #f5f5f5;
+}
+
+[data-theme="dark"] .mobileMenuButton {
+  background: #111;
+  border-color: #333;
+  color: #fff;
+}
+
+[data-theme="dark"] .mobileMenuButton:hover {
+  background: #1a1a1a;
+}
+
+/* Overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .mobileMenuButton {
+    display: flex;
+  }
+
+  .overlay {
+    display: block;
+  }
+}
+

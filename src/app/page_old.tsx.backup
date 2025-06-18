@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { 
-  Plus, Edit2, Trash2, ExternalLink, 
-  Globe, CheckCircle, XCircle, Search, BarChart3, Moon, Sun
+  Plus, LogOut, Edit2, Trash2, ExternalLink, 
+  Globe, CheckCircle, XCircle, Search, Moon, Sun, BarChart3, X
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Sidebar from '@/components/Sidebar';
 import styles from './page.module.css';
 
 // Dynamic imports for heavy components
@@ -37,16 +36,9 @@ interface Subdomain {
   updatedAt: string;
 }
 
-interface UserInfo {
-  name?: string;
-  email?: string;
-  picture?: string;
-}
-
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState('');
-  const [userInfo, setUserInfo] = useState<UserInfo | undefined>(undefined);
   const [subdomains, setSubdomains] = useState<Subdomain[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingSubdomain, setEditingSubdomain] = useState<Subdomain | null>(null);
@@ -54,8 +46,9 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [currentView, setCurrentView] = useState<'subdomains' | 'analytics' | 'dns' | 'verification'>('subdomains');
+  const [currentView, setCurrentView] = useState<'list' | 'details'>('list');
   const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
+  const [activeTab, setActiveTab] = useState<'analytics' | 'dns' | 'verification'>('analytics');
   const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
 
   // Form state
@@ -72,10 +65,10 @@ export default function Home() {
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token');
     const urlError = urlParams.get('error');
-    const urlUserInfo = urlParams.get('userInfo');
     
     if (urlError) {
       setError('Authentication failed. Please try again.');
+      // Clean URL
       window.history.replaceState({}, '', '/');
     }
     
@@ -83,38 +76,18 @@ export default function Home() {
       localStorage.setItem('token', urlToken);
       setToken(urlToken);
       setIsLoggedIn(true);
-      
-      if (urlUserInfo) {
-        try {
-          const parsedUserInfo = JSON.parse(decodeURIComponent(urlUserInfo));
-          localStorage.setItem('userInfo', JSON.stringify(parsedUserInfo));
-          setUserInfo(parsedUserInfo);
-        } catch (e) {
-          console.error('Failed to parse user info:', e);
-        }
-      }
-      
       fetchSubdomains(urlToken);
+      // Clean URL
       window.history.replaceState({}, '', '/');
       return;
     }
 
-    // Check for saved token and user info
+    // Check for saved token
     const savedToken = localStorage.getItem('token');
-    const savedUserInfo = localStorage.getItem('userInfo');
-    
     if (savedToken) {
       setToken(savedToken);
       setIsLoggedIn(true);
       fetchSubdomains(savedToken);
-      
-      if (savedUserInfo) {
-        try {
-          setUserInfo(JSON.parse(savedUserInfo));
-        } catch (e) {
-          console.error('Failed to parse saved user info:', e);
-        }
-      }
     }
 
     // Check theme
@@ -139,6 +112,8 @@ export default function Home() {
   };
 
   const handleGoogleLogin = () => {
+    // Redirect to Google OAuth
+    // In production, this will redirect to your configured OAuth endpoint
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     
     if (!clientId) {
@@ -231,6 +206,10 @@ export default function Home() {
       if (response.ok) {
         fetchSubdomains(token);
         setDeleteConfirm(null);
+        if (currentView === 'details' && selectedSubdomain?.subdomain === subdomain) {
+          setCurrentView('list');
+          setSelectedSubdomain(null);
+        }
       }
     } catch (err) {
       console.error('Failed to delete subdomain', err);
@@ -239,7 +218,13 @@ export default function Home() {
 
   const openDetails = (sub: Subdomain) => {
     setSelectedSubdomain(sub);
-    setCurrentView('analytics');
+    setActiveTab('analytics');
+    setCurrentView('details');
+  };
+
+  const closeDetails = () => {
+    setCurrentView('list');
+    setSelectedSubdomain(null);
   };
 
   const handleEdit = (subdomain: Subdomain) => {
@@ -256,11 +241,9 @@ export default function Home() {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('userInfo');
     setToken('');
     setIsLoggedIn(false);
     setSubdomains([]);
-    setUserInfo(undefined);
   };
 
   const filteredSubdomains = subdomains.filter(sub =>
@@ -318,168 +301,137 @@ export default function Home() {
     );
   }
 
-  return (
-    <div className={styles.appLayout}>
-      <Sidebar
-        darkMode={darkMode}
-        onToggleDarkMode={toggleDarkMode}
-        onLogout={handleLogout}
-        currentView={currentView}
-        onNavigate={setCurrentView}
-        userInfo={userInfo}
-      />
-
-      <main className={styles.mainContent}>
-        {/* DNS Checker View */}
-        {currentView === 'dns' && (
-          <div className={styles.pageContainer}>
-            <div className={styles.pageHeader}>
-              <h1>DNS Checker</h1>
-              <p>Check DNS records and global propagation for your subdomains</p>
-            </div>
-            <DNSChecker subdomain="blog" token={token} />
-          </div>
-        )}
-
-        {/* Verification View */}
-        {currentView === 'verification' && (
-          <div className={styles.pageContainer}>
-            <div className={styles.pageHeader}>
-              <h1>Verification Wizard</h1>
-              <p>Generate DNS verification records for popular services</p>
-            </div>
-            <VerificationWizard subdomain="blog" token={token} />
-          </div>
-        )}
-
-        {/* Analytics View (for selected subdomain) */}
-        {currentView === 'analytics' && selectedSubdomain && (
-          <div className={styles.pageContainer}>
-            <div className={styles.pageHeader}>
-              <h1>{selectedSubdomain.title}</h1>
-              <p>{selectedSubdomain.subdomain}.aryamanchandra.com</p>
-            </div>
-            <AnalyticsDashboard subdomain={selectedSubdomain.subdomain} token={token} />
-          </div>
-        )}
-
-        {/* Subdomains View (default) */}
-        {currentView === 'subdomains' && (
-          <div className={styles.pageContainer}>
-            <div className={styles.pageHeader}>
-              <div>
-                <h1>Subdomains</h1>
-                <p>{subdomains.length} total</p>
-              </div>
-              <button
-                onClick={() => {
-                  setShowCreateForm(true);
-                  setEditingSubdomain(null);
-                  setFormData({
-                    subdomain: '',
-                    title: '',
-                    description: '',
-                    content: '',
-                    customCss: '',
-                  });
-                }}
-                className={styles.createButton}
-              >
-                <Plus size={18} />
-                <span>Create Subdomain</span>
+  if (currentView === 'details' && selectedSubdomain) {
+    return (
+      <div className={styles.dashboard}>
+        <header className={styles.header}>
+          <div className={styles.headerContent}>
+            <div className={styles.headerLeft}>
+              <button onClick={closeDetails} className={styles.backButton}>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
               </button>
-            </div>
-
-            <div className={styles.searchBar}>
-              <Search size={18} className={styles.searchIcon} />
-              <input
-                type="text"
-                placeholder="Search subdomains..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
-              />
-            </div>
-
-            {filteredSubdomains.length === 0 ? (
-              <div className={styles.emptyState}>
-                <Globe size={48} strokeWidth={1.5} />
-                <h3>No subdomains found</h3>
-                <p>
-                  {searchQuery 
-                    ? 'Try a different search term' 
-                    : 'Create your first subdomain to get started'}
+              <div>
+                <h1 className={styles.headerTitle}>{selectedSubdomain.title}</h1>
+                <p className={styles.headerSubtitle}>
+                  {selectedSubdomain.subdomain}.aryamanchandra.com
                 </p>
               </div>
-            ) : (
-              <div className={styles.grid}>
-                {filteredSubdomains.map((sub) => (
-                  <div key={sub._id} className={styles.card}>
-                    <div className={styles.cardHeader}>
-                      <div className={styles.cardTitle}>
-                        <h3>{sub.title}</h3>
-                        <div className={styles.statusBadge} data-active={sub.isActive}>
-                          {sub.isActive ? (
-                            <><CheckCircle size={14} /> Active</>
-                          ) : (
-                            <><XCircle size={14} /> Inactive</>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <a 
-                      href={`http://${sub.subdomain}.aryamanchandra.com`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.subdomainLink}
-                    >
-                      {sub.subdomain}.aryamanchandra.com
-                      <ExternalLink size={14} />
-                    </a>
-                    
-                    {sub.description && (
-                      <p className={styles.cardDescription}>{sub.description}</p>
-                    )}
-                    
-                    <div className={styles.cardMeta}>
-                      <span className={styles.metaDate}>
-                        {new Date(sub.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric'
-                        })}
-                      </span>
-                    </div>
-                    
-                    <div className={styles.cardActions}>
-                      <button 
-                        onClick={() => openDetails(sub)} 
-                        className={styles.detailsButton}
-                      >
-                        <BarChart3 size={16} />
-                        <span>Analytics</span>
-                      </button>
-                      <button onClick={() => handleEdit(sub)} className={styles.actionButton}>
-                        <Edit2 size={16} />
-                        <span>Edit</span>
-                      </button>
-                      <button 
-                        onClick={() => setDeleteConfirm({ subdomain: sub.subdomain, title: sub.title })} 
-                        className={styles.deleteButton}
-                      >
-                        <Trash2 size={16} />
-                        <span>Delete</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            </div>
+            <div className={styles.headerRight}>
+              <button onClick={toggleDarkMode} className={styles.themeToggleButton} aria-label="Toggle theme">
+                {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+              <button onClick={handleLogout} className={styles.logoutButton}>
+                <LogOut size={18} />
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className={styles.detailsPage}>
+          <div className={styles.detailsTabs}>
+            <button
+              className={activeTab === 'analytics' ? styles.activeTab : ''}
+              onClick={() => setActiveTab('analytics')}
+            >
+              Analytics
+            </button>
+            <button
+              className={activeTab === 'dns' ? styles.activeTab : ''}
+              onClick={() => setActiveTab('dns')}
+            >
+              DNS Checker
+            </button>
+            <button
+              className={activeTab === 'verification' ? styles.activeTab : ''}
+              onClick={() => setActiveTab('verification')}
+            >
+              Verification
+            </button>
+          </div>
+
+          <div className={styles.detailsContent}>
+            {activeTab === 'analytics' && (
+              <AnalyticsDashboard 
+                subdomain={selectedSubdomain.subdomain}
+                token={token}
+              />
+            )}
+            {activeTab === 'dns' && (
+              <DNSChecker 
+                subdomain={selectedSubdomain.subdomain}
+                token={token}
+              />
+            )}
+            {activeTab === 'verification' && (
+              <VerificationWizard 
+                subdomain={selectedSubdomain.subdomain}
+                token={token}
+              />
             )}
           </div>
-        )}
+        </div>
+      </div>
+    );
+  }
 
-        {/* Create/Edit Modal */}
+  return (
+    <div className={styles.dashboard}>
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.headerLeft}>
+            <Globe size={28} strokeWidth={2.5} />
+            <div>
+              <h1 className={styles.headerTitle}>Subdomains</h1>
+              <p className={styles.headerSubtitle}>{subdomains.length} total</p>
+            </div>
+          </div>
+          <div className={styles.headerRight}>
+            <button onClick={toggleDarkMode} className={styles.themeToggleButton} aria-label="Toggle theme">
+              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button onClick={handleLogout} className={styles.logoutButton}>
+              <LogOut size={18} />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className={styles.container}>
+        <div className={styles.toolbar}>
+          <div className={styles.searchBar}>
+            <Search size={18} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search subdomains..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+          <button
+            onClick={() => {
+              setShowCreateForm(true);
+              setEditingSubdomain(null);
+              setFormData({
+                subdomain: '',
+                title: '',
+                description: '',
+                content: '',
+                customCss: '',
+              });
+            }}
+            className={styles.createButton}
+          >
+            <Plus size={18} />
+            <span>Create Subdomain</span>
+          </button>
+        </div>
+
         {showCreateForm && (
           <div className={styles.modal} onClick={() => setShowCreateForm(false)}>
             <div className={styles.modalCard} onClick={(e) => e.stopPropagation()}>
@@ -577,43 +529,120 @@ export default function Home() {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
-        {deleteConfirm && (
-          <div className={styles.confirmModal} onClick={() => setDeleteConfirm(null)}>
-            <div className={styles.confirmCard} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.confirmIcon}>
-                <Trash2 size={24} color="#ff0080" />
-              </div>
-              <h3>Delete Subdomain</h3>
+        <div className={styles.subdomainsList}>
+          {filteredSubdomains.length === 0 ? (
+            <div className={styles.emptyState}>
+              <Globe size={48} strokeWidth={1.5} />
+              <h3>No subdomains found</h3>
               <p>
-                Are you sure you want to delete <strong>{deleteConfirm.title}</strong>?
+                {searchQuery 
+                  ? 'Try a different search term' 
+                  : 'Create your first subdomain to get started'}
               </p>
-              <p className={styles.confirmSubtext}>
-                {deleteConfirm.subdomain}.aryamanchandra.com
-              </p>
-              <p className={styles.confirmWarning}>
-                This action cannot be undone. All data and analytics for this subdomain will be permanently deleted.
-              </p>
-              <div className={styles.confirmActions}>
-                <button 
-                  onClick={() => setDeleteConfirm(null)} 
-                  className={styles.confirmCancel}
-                >
-                  Cancel
-                </button>
-                <button 
-                  onClick={() => handleDelete(deleteConfirm.subdomain)} 
-                  className={styles.confirmDelete}
-                >
-                  <Trash2 size={16} />
-                  <span>Delete Subdomain</span>
-                </button>
-              </div>
+            </div>
+          ) : (
+            <div className={styles.grid}>
+              {filteredSubdomains.map((sub) => (
+                <div key={sub._id} className={styles.card}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardTitle}>
+                      <h3>{sub.title}</h3>
+                      <div className={styles.statusBadge} data-active={sub.isActive}>
+                        {sub.isActive ? (
+                          <><CheckCircle size={14} /> Active</>
+                        ) : (
+                          <><XCircle size={14} /> Inactive</>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <a 
+                    href={`http://${sub.subdomain}.aryamanchandra.com`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.subdomainLink}
+                  >
+                    {sub.subdomain}.aryamanchandra.com
+                    <ExternalLink size={14} />
+                  </a>
+                  
+                  {sub.description && (
+                    <p className={styles.cardDescription}>{sub.description}</p>
+                  )}
+                  
+                  <div className={styles.cardMeta}>
+                    <span className={styles.metaDate}>
+                      {new Date(sub.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                  
+                  <div className={styles.cardActions}>
+                    <button 
+                      onClick={() => openDetails(sub)} 
+                      className={styles.detailsButton}
+                    >
+                      <BarChart3 size={16} />
+                      <span>Details</span>
+                    </button>
+                    <button onClick={() => handleEdit(sub)} className={styles.actionButton}>
+                      <Edit2 size={16} />
+                      <span>Edit</span>
+                    </button>
+                    <button 
+                      onClick={() => setDeleteConfirm({ subdomain: sub.subdomain, title: sub.title })} 
+                      className={styles.deleteButton}
+                    >
+                      <Trash2 size={16} />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className={styles.confirmModal} onClick={() => setDeleteConfirm(null)}>
+          <div className={styles.confirmCard} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirmIcon}>
+              <Trash2 size={24} color="#ff0080" />
+            </div>
+            <h3>Delete Subdomain</h3>
+            <p>
+              Are you sure you want to delete <strong>{deleteConfirm.title}</strong>?
+            </p>
+            <p className={styles.confirmSubtext}>
+              {deleteConfirm.subdomain}.aryamanchandra.com
+            </p>
+            <p className={styles.confirmWarning}>
+              This action cannot be undone. All data and analytics for this subdomain will be permanently deleted.
+            </p>
+            <div className={styles.confirmActions}>
+              <button 
+                onClick={() => setDeleteConfirm(null)} 
+                className={styles.confirmCancel}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => handleDelete(deleteConfirm.subdomain)} 
+                className={styles.confirmDelete}
+              >
+                <Trash2 size={16} />
+                <span>Delete Subdomain</span>
+              </button>
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      )}
     </div>
   );
 }
-

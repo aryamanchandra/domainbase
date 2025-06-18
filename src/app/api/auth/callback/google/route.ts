@@ -83,9 +83,17 @@ export async function GET(request: NextRequest) {
       username: user.username 
     });
 
-    // Redirect to home with token
+    // Prepare user info for frontend
+    const userInfoForFrontend = {
+      name: user.name,
+      email: user.email,
+      picture: user.picture,
+    };
+
+    // Redirect to home with token and user info
     const redirectUrl = new URL('/', request.url);
     redirectUrl.searchParams.set('token', token);
+    redirectUrl.searchParams.set('userInfo', encodeURIComponent(JSON.stringify(userInfoForFrontend)));
 
     const response = NextResponse.redirect(redirectUrl);
     
