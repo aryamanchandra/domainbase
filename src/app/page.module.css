@@ -1077,57 +1077,52 @@
 }
 
 .detailsTabs {
-  display: flex;
+  display: inline-flex;
   gap: 8px;
-  padding: 0 32px;
-  background: white;
-  border-bottom: 1px solid #eaeaea;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  background: #f5f5f5;
+  padding: 4px;
+  border-radius: 8px;
+  margin: 0 0 24px;
+  border: none;
+  overflow-x: auto;
 }
-
 [data-theme="dark"] .detailsTabs {
-  background: #111;
-  border-bottom-color: #222;
+  background: #1a1a1a;
+  border: none;
 }
-
 .detailsTabs button {
-  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
-  position: relative;
-  top: 1px;
+  white-space: nowrap;
+  border-radius: 6px;
 }
-
 .detailsTabs button:hover {
   color: #000;
-  background: #fafafa;
+  background: #fff;
 }
-
 .detailsTabs button.activeTab {
-  color: #000;
-  border-bottom-color: #000;
+  background: #000;
+  color: #fff;
 }
-
 [data-theme="dark"] .detailsTabs button {
   color: #999;
 }
-
 [data-theme="dark"] .detailsTabs button:hover {
   color: #fff;
-  background: #0a0a0a;
+  background: #222;
 }
-
 [data-theme="dark"] .detailsTabs button.activeTab {
-  color: #fff;
-  border-bottom-color: #fff;
+  background: #fff;
+  color: #000;
 }
 
 .detailsContent {
@@ -1601,41 +1596,45 @@
 }
 
 .detailsTabs {
-  display: flex;
-  gap: 4px;
-  border-bottom: 1px solid #eaeaea;
-  margin-bottom: 32px;
+  display: inline-flex;
+  gap: 8px;
+  background: #f5f5f5;
+  padding: 4px;
+  border-radius: 8px;
+  margin: 0 0 24px;
+  border: none;
   overflow-x: auto;
 }
 
 [data-theme="dark"] .detailsTabs {
-  border-bottom-color: #333;
+  background: #1a1a1a;
+  border: none;
 }
 
 .detailsTabs button {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 8px 14px;
   background: transparent;
   border: none;
-  border-bottom: 2px solid transparent;
   color: #666;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  border-radius: 6px;
 }
 
 .detailsTabs button:hover {
   color: #000;
-  background: #f5f5f5;
+  background: #fff;
 }
 
 .detailsTabs button.activeTab {
-  color: #000;
-  border-bottom-color: #000;
+  background: #000;
+  color: #fff;
 }
 
 [data-theme="dark"] .detailsTabs button {
@@ -1644,12 +1643,12 @@
 
 [data-theme="dark"] .detailsTabs button:hover {
   color: #fff;
-  background: #1a1a1a;
+  background: #222;
 }
 
 [data-theme="dark"] .detailsTabs button.activeTab {
-  color: #fff;
-  border-bottom-color: #fff;
+  background: #fff;
+  color: #000;
 }
 
 .detailsContent {
