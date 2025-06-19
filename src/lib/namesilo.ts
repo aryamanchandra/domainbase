@@ -32,15 +32,20 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
   const res = await fetch(url, { cache: 'no-store' });
   const text = await res.text();
 
-  // Very small XML parsing without an extra dep; sufficient for NameSilo basics
-  // Extract <reply><code> and records under <resource_record>
+  // Parse minimal fields from XML response
   const codeMatch = text.match(/<code>(\d+)<\/code>/);
+  const detailMatch = text.match(/<detail>([\s\S]*?)<\/detail>/);
   const code = codeMatch ? parseInt(codeMatch[1], 10) : 0;
-  if (code !== 300 && code !== 301 && code !== 200) {
-    throw new Error(`NameSilo error code ${code}`);
+  const detail = (detailMatch ? detailMatch[1] : '').trim();
+
+  // Success codes: 200 OK (general) / 300 success / 301 success with warnings
+  if (![200, 300, 301].includes(code)) {
+    const reason = detail || 'Unknown error';
+    const err = new Error(`NameSilo error ${code}: ${reason}`);
+    (err as any).responseBody = text;
+    throw err;
   }
 
-  // Return raw text to endpoint handlers which can pick what they need
   return text as unknown as T;
 }
 

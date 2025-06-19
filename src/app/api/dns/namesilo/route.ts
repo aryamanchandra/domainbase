@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
     const records = await listDnsRecords();
     return NextResponse.json({ success: true, records });
   } catch (error: any) {
+    console.error('NameSilo GET error:', error?.message, error?.responseBody);
     return NextResponse.json({ error: error.message || 'Failed to list records' }, { status: 500 });
   }
 }
@@ -38,6 +39,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: 'Unsupported operation' }, { status: 400 });
   } catch (error: any) {
+    console.error('NameSilo POST error:', error?.message, error?.responseBody);
     return NextResponse.json({ error: error.message || 'Failed to modify record' }, { status: 500 });
   }
 }

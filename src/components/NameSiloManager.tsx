@@ -19,20 +19,26 @@ export default function NameSiloManager({ token }: Props) {
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [host, setHost] = useState('');
   const [value, setValue] = useState('');
   const [ttl, setTtl] = useState<number>(3600);
 
   async function fetchRecords() {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/dns/namesilo', {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch records');
+      }
       setRecords(data.records || []);
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to fetch records', e);
+      setError(e?.message || 'Failed to fetch records');
     } finally {
       setLoading(false);
     }
@@ -42,17 +48,23 @@ export default function NameSiloManager({ token }: Props) {
 
   async function addTxt() {
     setAdding(true);
+    setError(null);
     try {
-      await fetch('/api/dns/namesilo', {
+      const res = await fetch('/api/dns/namesilo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ type: 'TXT', host, value, ttl }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error((data as any).error || 'Failed to add record');
+      }
       setHost('');
       setValue('');
       await fetchRecords();
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to add record', e);
+      setError(e?.message || 'Failed to add record');
     } finally {
       setAdding(false);
     }
@@ -60,14 +72,19 @@ export default function NameSiloManager({ token }: Props) {
 
   async function removeRecord(id: string) {
     try {
-      await fetch('/api/dns/namesilo', {
+      const res = await fetch('/api/dns/namesilo', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ type: 'DELETE', recordId: id }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error((data as any).error || 'Failed to delete record');
+      }
       await fetchRecords();
-    } catch (e) {
+    } catch (e: any) {
       console.error('Failed to delete record', e);
+      setError(e?.message || 'Failed to delete record');
     }
   }
 
@@ -88,6 +105,10 @@ export default function NameSiloManager({ token }: Props) {
         <input type="number" placeholder="TTL" value={ttl} onChange={(e) => setTtl(parseInt(e.target.value || '3600', 10))} className={styles.button} />
         <button className={styles.button} onClick={addTxt} disabled={adding || !host || !value}>{adding ? 'Adding…' : 'Add TXT'}</button>
       </div>
+
+      {error && (
+        <div style={{ marginBottom: 12, color: '#ff0080' }}>{error}</div>
+      )}
 
       <table className={styles.table}>
         <thead>
