@@ -29,11 +29,7 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
   }
 
   const url = `${NAMESILO_API_BASE}/${endpoint}?${buildQuery(params)}`;
-  const res = await fetch(url, {
-    headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    },
-  });
+  const res = await fetch(url);
   const text = await res.text();
 
   const contentType = res.headers.get('content-type') || '';
