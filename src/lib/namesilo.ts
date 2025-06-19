@@ -30,11 +30,8 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
 
   const url = `${NAMESILO_API_BASE}/${endpoint}?${buildQuery(params)}`;
   const res = await fetch(url, {
-    cache: 'no-store',
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-      'Accept': 'application/xml, text/xml;q=0.9, */*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     },
   });
   const text = await res.text();
