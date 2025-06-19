@@ -57,6 +57,7 @@ export default function VerificationWizard({ subdomain, token }: Props) {
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [customOptions, setCustomOptions] = useState<any>({});
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'spf' | 'dkim' | 'dmarc' | 'google-search-console'>('all');
 
   useEffect(() => {
     fetchRecords();
@@ -114,12 +115,26 @@ export default function VerificationWizard({ subdomain, token }: Props) {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
+  const fqdn = `${subdomain}.aryamanchandra.com`;
+
+  const filteredRecords = records.filter(r => filter === 'all' ? true : r.service === filter);
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div>
-          <h3>Verification Wizard</h3>
-          <p>One-click generation of DNS verification records</p>
+        <div className={styles.titleBlock}>
+          <h3>Verification</h3>
+          <div className={styles.domainRow}>
+            <code className={styles.domainMono}>{fqdn}</code>
+            <button
+              onClick={() => copyToClipboard(fqdn, 'fqdn')}
+              className={styles.smallCopy}
+              aria-label="Copy domain"
+            >
+              {copiedField === 'fqdn' ? <CheckCircle size={14} color="#06ffa5" /> : <Copy size={14} />}
+            </button>
+          </div>
+          <p>Generate and manage TXT records to verify services for this subdomain</p>
         </div>
         <button
           onClick={() => setShowForm(true)}
@@ -128,6 +143,20 @@ export default function VerificationWizard({ subdomain, token }: Props) {
           <Plus size={18} />
           <span>Add Record</span>
         </button>
+      </div>
+
+      <div className={styles.segmented}>
+        <button
+          className={`${styles.segment} ${filter === 'all' ? styles.active : ''}`}
+          onClick={() => setFilter('all')}
+        >All</button>
+        {services.map(s => (
+          <button
+            key={s.id}
+            className={`${styles.segment} ${filter === (s.id as any) ? styles.active : ''}`}
+            onClick={() => setFilter(s.id as any)}
+          >{s.name}</button>
+        ))}
       </div>
 
       {showForm && (
@@ -233,9 +262,9 @@ export default function VerificationWizard({ subdomain, token }: Props) {
         </div>
       )}
 
-      {records.length > 0 ? (
+      {filteredRecords.length > 0 ? (
         <div className={styles.recordsList}>
-          {records.map((record) => {
+          {filteredRecords.map((record) => {
             const service = services.find((s) => s.id === record.service);
             const Icon = service?.icon || Shield;
             const color = service?.color || '#666';
@@ -259,38 +288,45 @@ export default function VerificationWizard({ subdomain, token }: Props) {
                 </div>
 
                 <div className={styles.recordDetails}>
-                  <div className={styles.recordField}>
-                    <label>Name</label>
-                    <div className={styles.copyField}>
-                      <code>{record.name}</code>
-                      <button
-                        onClick={() => copyToClipboard(record.name, `name-${record._id}`)}
-                        className={styles.copyButton}
-                      >
-                        {copiedField === `name-${record._id}` ? (
-                          <CheckCircle size={16} color="#06ffa5" />
-                        ) : (
-                          <Copy size={16} />
-                        )}
-                      </button>
+                  <div className={styles.gridTwo}>
+                    <div className={styles.recordField}>
+                      <label>Name</label>
+                      <div className={styles.copyField}>
+                        <code>{record.name}</code>
+                        <button
+                          onClick={() => copyToClipboard(record.name, `name-${record._id}`)}
+                          className={styles.copyButton}
+                        >
+                          {copiedField === `name-${record._id}` ? (
+                            <CheckCircle size={16} color="#06ffa5" />
+                          ) : (
+                            <Copy size={16} />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className={styles.recordField}>
+                      <label>Value</label>
+                      <div className={styles.copyField}>
+                        <code>{record.value}</code>
+                        <button
+                          onClick={() => copyToClipboard(record.value, `value-${record._id}`)}
+                          className={styles.copyButton}
+                        >
+                          {copiedField === `value-${record._id}` ? (
+                            <CheckCircle size={16} color="#06ffa5" />
+                          ) : (
+                            <Copy size={16} />
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  <div className={styles.recordField}>
-                    <label>Value</label>
-                    <div className={styles.copyField}>
-                      <code>{record.value}</code>
-                      <button
-                        onClick={() => copyToClipboard(record.value, `value-${record._id}`)}
-                        className={styles.copyButton}
-                      >
-                        {copiedField === `value-${record._id}` ? (
-                          <CheckCircle size={16} color="#06ffa5" />
-                        ) : (
-                          <Copy size={16} />
-                        )}
-                      </button>
-                    </div>
+                  <div className={styles.inlineMeta}>
+                    <span>Type: <code>{record.recordType}</code></span>
+                    <span>TTL: <code>300</code></span>
                   </div>
                 </div>
 
