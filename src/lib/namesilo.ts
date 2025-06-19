@@ -52,13 +52,17 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
     parsed = JSON.parse(text);
   } catch {}
 
-  const code = Number(parsed?.namesilo?.reply?.code || 0);
-  const detail = String(parsed?.namesilo?.reply?.detail || '').trim();
+  // JSON responses are typically { request: {...}, reply: {...} }
+  const reply = parsed?.namesilo?.reply ?? parsed?.reply ?? null;
+  const request = parsed?.namesilo?.request ?? parsed?.request ?? null;
+  const code = Number(reply?.code || 0);
+  const detail = String(reply?.detail || '').trim();
 
   // Success codes: 200 OK (general) / 300 success / 301 success with warnings
   if (![200, 300, 301].includes(code)) {
     const reason = detail || 'Unknown error';
-    const err = new Error(`NameSilo error ${code}: ${reason}`);
+    const seenIp = request?.ip ? ` (request.ip: ${request.ip})` : '';
+    const err = new Error(`NameSilo error ${code}: ${reason}${seenIp}`);
     (err as any).responseBody = text;
     throw err;
   }
@@ -68,7 +72,8 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
 
 export async function listDnsRecords(): Promise<NameSiloDnsRecord[]> {
   const data = await callApi<any>('dnsListRecords', { domain: NAMESILO_DOMAIN });
-  const rr = data?.namesilo?.reply?.resource_record;
+  const reply = data?.namesilo?.reply ?? data?.reply;
+  const rr = reply?.resource_record;
   if (!rr) return [];
   const arr: any[] = Array.isArray(rr) ? rr : [rr];
   return arr.map((r: any) => ({
