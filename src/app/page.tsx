@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
+import NameSiloManager from '@/components/NameSiloManager';
 import styles from './page.module.css';
 
 // Dynamic imports for heavy components
@@ -54,7 +55,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details'>('subdomains');
+  const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details' | 'dns-records'>('subdomains');
   const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
   const [detailsTab, setDetailsTab] = useState<'analytics' | 'dns' | 'verification'>('analytics');
   const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
@@ -356,6 +357,17 @@ export default function Home() {
       />
 
       <main className={styles.mainContent}>
+        {/* DNS Records Manager */}
+        {currentView === 'dns-records' && (
+          <div className={styles.pageContainer}>
+            <div className={styles.pageHeader}>
+              <h1>DNS Records</h1>
+              <p>Manage NameSilo DNS records directly</p>
+            </div>
+            <NameSiloManager token={token} />
+          </div>
+        )}
+
         {/* DNS Checker View */}
         {currentView === 'dns' && (
           <div className={styles.pageContainer}>

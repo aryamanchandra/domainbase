@@ -11,8 +11,8 @@ interface Props {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onLogout: () => void;
-  currentView: 'subdomains' | 'dns' | 'details';
-  onNavigate: (view: 'subdomains' | 'dns' | 'details') => void;
+  currentView: 'subdomains' | 'dns' | 'details' | 'dns-records';
+  onNavigate: (view: 'subdomains' | 'dns' | 'details' | 'dns-records') => void;
   userInfo?: {
     name?: string;
     email?: string;
@@ -38,6 +38,7 @@ export default function Sidebar({
   const navigationItems = [
     { id: 'subdomains' as const, label: 'Subdomains', icon: Home },
     { id: 'dns' as const, label: 'DNS Checker', icon: Search },
+    { id: 'dns-records' as const, label: 'DNS Records', icon: Shield },
   ];
 
   return (
