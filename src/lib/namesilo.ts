@@ -15,7 +15,7 @@ export interface NameSiloDnsRecord {
 function buildQuery(params: Record<string, string | number | undefined>) {
   const query = new URLSearchParams();
   query.set('version', '1');
-  query.set('type', 'xml');
+  query.set('type', 'json');
   query.set('key', NAMESILO_API_KEY);
   Object.entries(params).forEach(([k, v]) => {
     if (v !== undefined) query.set(k, String(v));
@@ -29,14 +29,31 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
   }
 
   const url = `${NAMESILO_API_BASE}/${endpoint}?${buildQuery(params)}`;
-  const res = await fetch(url, { cache: 'no-store' });
+  const res = await fetch(url, {
+    cache: 'no-store',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Accept': 'application/xml, text/xml;q=0.9, */*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9',
+    },
+  });
   const text = await res.text();
 
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('text/html') && text.includes('Cloudflare')) {
+    const err = new Error('Blocked by Cloudflare (HTML challenge page returned). Consider allowlisting server IP or try again later.');
+    (err as any).responseBody = text;
+    throw err;
+  }
+
   // Parse minimal fields from XML response
-  const codeMatch = text.match(/<code>(\d+)<\/code>/);
-  const detailMatch = text.match(/<detail>([\s\S]*?)<\/detail>/);
-  const code = codeMatch ? parseInt(codeMatch[1], 10) : 0;
-  const detail = (detailMatch ? detailMatch[1] : '').trim();
+  let parsed: any = null;
+  try {
+    parsed = JSON.parse(text);
+  } catch {}
+
+  const code = Number(parsed?.namesilo?.reply?.code || 0);
+  const detail = String(parsed?.namesilo?.reply?.detail || '').trim();
 
   // Success codes: 200 OK (general) / 300 success / 301 success with warnings
   if (![200, 300, 301].includes(code)) {
@@ -46,26 +63,21 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
     throw err;
   }
 
-  return text as unknown as T;
+  return parsed as T;
 }
 
 export async function listDnsRecords(): Promise<NameSiloDnsRecord[]> {
-  const xml = await callApi<string>('dnsListRecords', { domain: NAMESILO_DOMAIN });
-  const records: NameSiloDnsRecord[] = [];
-  const rrRegex = /<resource_record>([\s\S]*?)<\/resource_record>/g;
-  let m: RegExpExecArray | null;
-  while ((m = rrRegex.exec(xml))) {
-    const block = m[1];
-    const get = (tag: string) => (block.match(new RegExp(`<${tag}>([\s\S]*?)<\/${tag}>`)) || [])[1] || '';
-    records.push({
-      record_id: get('record_id'),
-      type: get('type'),
-      host: get('host'),
-      value: get('value'),
-      ttl: get('ttl'),
-    });
-  }
-  return records;
+  const data = await callApi<any>('dnsListRecords', { domain: NAMESILO_DOMAIN });
+  const rr = data?.namesilo?.reply?.resource_record;
+  if (!rr) return [];
+  const arr: any[] = Array.isArray(rr) ? rr : [rr];
+  return arr.map((r: any) => ({
+    record_id: String(r.record_id),
+    type: String(r.type),
+    host: String(r.host),
+    value: String(r.value),
+    ttl: String(r.ttl),
+  }));
 }
 
 export async function addTxtRecord(host: string, value: string, ttl: number = 3600) {
@@ -74,7 +86,7 @@ export async function addTxtRecord(host: string, value: string, ttl: number = 36
     rrtype: 'TXT',
     rrhost: host,
     rrvalue: value,
-    rrtll: ttl,
+    rrttl: ttl,
   });
 }
 
