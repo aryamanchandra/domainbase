@@ -61,8 +61,9 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
   // Success codes: 200 OK (general) / 300 success / 301 success with warnings
   if (![200, 300, 301].includes(code)) {
     const reason = detail || 'Unknown error';
-    const seenIp = request?.ip ? ` (request.ip: ${request.ip})` : '';
+    const seenIp = request?.ip ? ` - Server IP: ${request.ip}` : '';
     const err = new Error(`NameSilo error ${code}: ${reason}${seenIp}`);
+    (err as any).serverIp = request?.ip;
     (err as any).responseBody = text;
     throw err;
   }

@@ -107,7 +107,21 @@ export default function NameSiloManager({ token }: Props) {
       </div>
 
       {error && (
-        <div style={{ marginBottom: 12, color: '#ff0080' }}>{error}</div>
+        <div style={{ 
+          marginBottom: 12, 
+          padding: '12px 16px', 
+          background: error.includes('error 113') ? '#ffe5e5' : '#fff5f5',
+          border: `1px solid ${error.includes('error 113') ? '#ff4444' : '#ff0080'}`,
+          borderRadius: 8,
+          color: '#000'
+        }}>
+          <strong>{error.includes('error 113') ? '⚠️ IP Restriction Error' : 'Error'}:</strong> {error}
+          {error.includes('error 113') && (
+            <div style={{ marginTop: 8, fontSize: 14 }}>
+              <p style={{ margin: 0 }}>Your server IP is not allowlisted. Add the IP shown above to NameSilo → API Manager → IP Address Restrictions.</p>
+            </div>
+          )}
+        </div>
       )}
 
       <table className={styles.table}>
