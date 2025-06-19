@@ -12,6 +12,11 @@ export async function GET(request: NextRequest) {
     const records = await listDnsRecords();
     return NextResponse.json({ success: true, records });
   } catch (error: any) {
+    console.error('[NameSilo API Error]', {
+      message: error?.message,
+      serverIp: error?.serverIp,
+      responseBody: error?.responseBody?.substring(0, 500)
+    });
     const status = error?.message?.includes('error 113') ? 403 : 500;
     return NextResponse.json({ error: error.message || 'Failed to list records' }, { status });
   }
