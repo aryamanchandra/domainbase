@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import https from 'https';
 
 const NAMESILO_API_KEY = process.env.NAMESILO_API_KEY || '';
 const NAMESILO_API_BASE = process.env.NAMESILO_API_BASE || 'https://www.namesilo.com/api';
@@ -23,17 +24,28 @@ function buildQuery(params: Record<string, string | number | undefined>) {
   return query.toString();
 }
 
+function httpsGet(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      let data = '';
+      res.on('data', (chunk) => data += chunk);
+      res.on('end', () => resolve(data));
+    }).on('error', reject);
+  });
+}
+
 async function callApi<T = any>(endpoint: string, params: Record<string, string | number | undefined>): Promise<T> {
   if (!NAMESILO_API_KEY) {
     throw new Error('NAMESILO_API_KEY not configured');
   }
 
   const url = `${NAMESILO_API_BASE}/${endpoint}?${buildQuery(params)}`;
-  const res = await fetch(url);
-  const text = await res.text();
+  console.log('[NameSilo] Calling:', url.replace(NAMESILO_API_KEY, 'xxx'));
+  
+  const text = await httpsGet(url);
+  console.log('[NameSilo] Response preview:', text.substring(0, 200));
 
-  const contentType = res.headers.get('content-type') || '';
-  if (contentType.includes('text/html') && text.includes('Cloudflare')) {
+  if (text.includes('<!DOCTYPE html>') && text.includes('Cloudflare')) {
     const err = new Error('Blocked by Cloudflare (HTML challenge page returned). Consider allowlisting server IP or try again later.');
     (err as any).responseBody = text;
     throw err;
