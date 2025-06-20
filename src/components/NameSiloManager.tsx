@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { RefreshCw, Plus, Shield, Edit2, Trash2, Check, X } from 'lucide-react';
 import styles from './NameSiloManager.module.css';
 
 interface Props {
@@ -191,13 +192,16 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
         <h3 className={styles.title}>DNS Records Manager</h3>
         <div className={styles.actions}>
           <button className={styles.button} onClick={fetchRecords} disabled={loading}>
-            {loading ? 'Refreshing…' : '🔄 Refresh'}
+            <RefreshCw size={16} />
+            {loading ? 'Refreshing…' : 'Refresh'}
           </button>
           <button className={styles.buttonPrimary} onClick={() => setShowVerificationForm(!showVerificationForm)}>
-            🔐 Generate Verification
+            <Shield size={16} />
+            Generate Verification
           </button>
           <button className={styles.buttonPrimary} onClick={() => setShowAddForm(!showAddForm)}>
-            ➕ Add Record
+            <Plus size={16} />
+            Add Record
           </button>
         </div>
       </div>
@@ -349,13 +353,13 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
                       onClick={updateRecord}
                       disabled={updating}
                     >
-                      {updating ? '...' : '✓'}
+                      {updating ? '...' : <Check size={14} />}
                     </button>
                     <button 
                       className={styles.buttonSmall} 
                       onClick={() => setEditingRecord(null)}
                     >
-                      ✕
+                      <X size={14} />
                     </button>
                   </div>
                 </td>
@@ -368,8 +372,12 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
                 <td className={styles.mono}>{r.ttl}</td>
                 <td>
                   <div style={{ display: 'flex', gap: 4 }}>
-                    <button className={styles.buttonSmall} onClick={() => startEdit(r)}>✏️</button>
-                    <button className={`${styles.buttonSmall} ${styles.danger}`} onClick={() => removeRecord(r.record_id)}>🗑️</button>
+                    <button className={styles.buttonSmall} onClick={() => startEdit(r)}>
+                      <Edit2 size={14} />
+                    </button>
+                    <button className={`${styles.buttonSmall} ${styles.danger}`} onClick={() => removeRecord(r.record_id)}>
+                      <Trash2 size={14} />
+                    </button>
                   </div>
                 </td>
               </tr>

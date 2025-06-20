@@ -37,6 +37,9 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .button:hover:not(:disabled) {
@@ -69,6 +72,9 @@
   cursor: pointer;
   font-size: 14px;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .buttonPrimary:hover:not(:disabled) {
@@ -98,6 +104,9 @@
   color: #000;
   cursor: pointer;
   font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .buttonSmall:hover {
