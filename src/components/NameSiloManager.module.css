@@ -1,13 +1,7 @@
 .container {
-  background: white;
-  border: 1px solid #eaeaea;
-  border-radius: 12px;
-  padding: 24px;
 }
 
 [data-theme="dark"] .container {
-  background: #111;
-  border-color: #333;
 }
 
 .header {
@@ -29,7 +23,7 @@
 }
 
 .button {
-  padding: 8px 12px;
+  padding: 10px 16px;
   border-radius: 8px;
   border: 1px solid #eaeaea;
   background: white;
@@ -39,7 +33,7 @@
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .button:hover:not(:disabled) {
@@ -64,7 +58,7 @@
 }
 
 .buttonPrimary {
-  padding: 8px 12px;
+  padding: 10px 16px;
   border-radius: 8px;
   border: 1px solid #000;
   background: #000;
@@ -74,7 +68,7 @@
   transition: all 0.2s;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .buttonPrimary:hover:not(:disabled) {
@@ -228,6 +222,28 @@
 
 .danger {
   color: #ff0080;
+}
+
+
+/* New section wrappers so each section has its own background */
+.sectionCard {
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+[data-theme="dark"] .sectionCard {
+  background: #111;
+  border-color: #333;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 

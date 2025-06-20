@@ -26,6 +26,11 @@ const VerificationWizard = dynamic(() => import('@/components/VerificationWizard
   loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading verification wizard...</div>
 });
 
+const WhoisLookup = dynamic(() => import('@/components/WhoisLookup'), {
+  ssr: false,
+  loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading WHOIS…</div>
+});
+
 interface Subdomain {
   _id: string;
   subdomain: string;
@@ -55,7 +60,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details' | 'dns-records'>('subdomains');
+  const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois'>('subdomains');
   const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
   const [detailsTab, setDetailsTab] = useState<'analytics' | 'dns' | 'verification'>('analytics');
   const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
@@ -71,61 +76,124 @@ export default function Home() {
   });
 
   useEffect(() => {
-    // Check for token in URL (from OAuth callback)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token');
-    const urlError = urlParams.get('error');
-    const urlUserInfo = urlParams.get('userInfo');
-    
-    if (urlError) {
-      setError('Authentication failed. Please try again.');
-      window.history.replaceState({}, '', '/');
-    }
-    
-    if (urlToken) {
-      localStorage.setItem('token', urlToken);
-      setToken(urlToken);
-      setIsLoggedIn(true);
-      
-      if (urlUserInfo) {
-        try {
-          const parsedUserInfo = JSON.parse(decodeURIComponent(urlUserInfo));
-          localStorage.setItem('userInfo', JSON.stringify(parsedUserInfo));
-          setUserInfo(parsedUserInfo);
-        } catch (e) {
-          console.error('Failed to parse user info:', e);
-        }
-      }
-      
-      fetchSubdomains(urlToken);
-      window.history.replaceState({}, '', '/');
-      return;
-    }
+    // Profile picture cache helpers
+    const PROFILE_PIC_CACHE_KEY = 'cachedProfilePic';
+    const PROFILE_PIC_CACHE_TIME_KEY = 'cachedProfilePicTime';
+    const PROFILE_PIC_CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-    // Check for saved token and user info
-    const savedToken = localStorage.getItem('token');
-    const savedUserInfo = localStorage.getItem('userInfo');
-    
-    if (savedToken) {
-      setToken(savedToken);
-      setIsLoggedIn(true);
-      fetchSubdomains(savedToken);
-      
-      if (savedUserInfo) {
-        try {
-          setUserInfo(JSON.parse(savedUserInfo));
-        } catch (e) {
-          console.error('Failed to parse saved user info:', e);
-        }
+    async function cacheProfilePicture(url: string) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64 = reader.result as string;
+          localStorage.setItem(PROFILE_PIC_CACHE_KEY, base64);
+          localStorage.setItem(PROFILE_PIC_CACHE_TIME_KEY, String(Date.now()));
+        };
+        reader.readAsDataURL(blob);
+      } catch (e) {
+        console.error('Failed to cache profile picture:', e);
       }
     }
 
-    // Check theme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.setAttribute('data-theme', 'dark');
+    async function loadCachedProfilePicture(originalUrl?: string): Promise<string | null> {
+      const cached = localStorage.getItem(PROFILE_PIC_CACHE_KEY);
+      const cachedTime = localStorage.getItem(PROFILE_PIC_CACHE_TIME_KEY);
+      
+      if (cached && cachedTime) {
+        const age = Date.now() - parseInt(cachedTime, 10);
+        if (age < PROFILE_PIC_CACHE_TTL) {
+          return cached;
+        }
+      }
+      
+      // Cache expired or missing, fetch fresh if we have URL
+      if (originalUrl) {
+        cacheProfilePicture(originalUrl);
+      }
+      
+      return null;
     }
+
+    // Main effect logic
+    (async () => {
+      // Check for token in URL (from OAuth callback)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      const urlError = urlParams.get('error');
+      const urlUserInfo = urlParams.get('userInfo');
+      
+      if (urlError) {
+        setError('Authentication failed. Please try again.');
+        window.history.replaceState({}, '', '/');
+      }
+      
+      if (urlToken) {
+        localStorage.setItem('token', urlToken);
+        setToken(urlToken);
+        setIsLoggedIn(true);
+        
+        if (urlUserInfo) {
+          try {
+            const parsedUserInfo = JSON.parse(decodeURIComponent(urlUserInfo));
+            localStorage.setItem('userInfo', JSON.stringify(parsedUserInfo));
+            setUserInfo(parsedUserInfo);
+            
+            // Cache profile picture
+            if (parsedUserInfo.picture) {
+              const cached = await loadCachedProfilePicture(parsedUserInfo.picture);
+              if (cached) {
+                setUserInfo({ ...parsedUserInfo, picture: cached });
+              }
+            }
+          } catch (e) {
+            console.error('Failed to parse user info:', e);
+          }
+        }
+        
+        fetchSubdomains(urlToken);
+        window.history.replaceState({}, '', '/');
+        return;
+      }
+
+      // Check for saved token and user info
+      const savedToken = localStorage.getItem('token');
+      const savedUserInfo = localStorage.getItem('userInfo');
+      
+      if (savedToken) {
+        setToken(savedToken);
+        setIsLoggedIn(true);
+        fetchSubdomains(savedToken);
+        
+        if (savedUserInfo) {
+          try {
+            const parsedUserInfo = JSON.parse(savedUserInfo);
+            
+            // Try to load cached profile picture first
+            if (parsedUserInfo.picture) {
+              const cached = await loadCachedProfilePicture(parsedUserInfo.picture);
+              if (cached) {
+                setUserInfo({ ...parsedUserInfo, picture: cached });
+              } else {
+                setUserInfo(parsedUserInfo);
+              }
+            } else {
+              setUserInfo(parsedUserInfo);
+            }
+          } catch (e) {
+            console.error('Failed to parse saved user info:', e);
+          }
+        }
+      }
+
+      // Check theme
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        setDarkMode(true);
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
   }, []);
 
   const toggleDarkMode = () => {
@@ -282,6 +350,8 @@ export default function Home() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
+    localStorage.removeItem('cachedProfilePic');
+    localStorage.removeItem('cachedProfilePicTime');
     setToken('');
     setIsLoggedIn(false);
     setSubdomains([]);
@@ -357,13 +427,10 @@ export default function Home() {
       />
 
       <main className={styles.mainContent}>
-        {/* DNS Records Manager */}
+        {/* Domain Manager */}
         {currentView === 'dns-records' && (
           <div className={styles.pageContainer}>
-            <div className={styles.pageHeader}>
-              <h1>DNS Records</h1>
-              <p>Manage NameSilo DNS records directly</p>
-            </div>
+
             <NameSiloManager 
               token={token} 
               subdomains={subdomains.map(s => ({ subdomain: s.subdomain, userId: s._id }))}
@@ -379,6 +446,17 @@ export default function Home() {
               <p>Check DNS records and global propagation worldwide</p>
             </div>
             <DNSChecker subdomain="blog" token={token} />
+          </div>
+        )}
+
+        {/* WHOIS Lookup */}
+        {currentView === 'whois' && (
+          <div className={styles.pageContainer}>
+            <div className={styles.pageHeader}>
+              <h1>WHOIS Lookup</h1>
+              <p>Domain info from your NameSilo account</p>
+            </div>
+            <WhoisLookup token={token} />
           </div>
         )}
 

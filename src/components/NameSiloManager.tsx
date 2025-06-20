@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw, Plus, Shield, Edit2, Trash2, Check, X } from 'lucide-react';
 import styles from './NameSiloManager.module.css';
+import styles2 from '../app/page.module.css';
 
 interface Props {
   token: string;
@@ -31,6 +32,19 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
   const [records, setRecords] = useState<RecordItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Domain info state + client cache
+  const [domainInfo, setDomainInfo] = useState<any | null>(null);
+  const [loadingDomain, setLoadingDomain] = useState(false);
+  
+  // Nameservers state
+  const [nameservers, setNameservers] = useState<string[]>([]);
+  const [loadingNS, setLoadingNS] = useState(false);
+  const [savingNS, setSavingNS] = useState(false);
+  const [editingNS, setEditingNS] = useState<number | null>(null);
+  const [editNSValue, setEditNSValue] = useState('');
+  const [addingNS, setAddingNS] = useState(false);
+  const [newNSValue, setNewNSValue] = useState('');
   
   // Add form state
   const [showAddForm, setShowAddForm] = useState(false);
@@ -69,7 +83,167 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
     }
   }
 
-  useEffect(() => { fetchRecords(); }, []);
+  useEffect(() => { 
+    fetchRecords();
+    fetchDomainInfo();
+    fetchNameservers();
+  }, []);
+
+  async function fetchDomainInfo(force = false) {
+    try {
+      setLoadingDomain(true);
+      setError(null);
+      const CACHE_KEY = 'domainInfoCache';
+      const CACHE_TIME_KEY = 'domainInfoCacheTime';
+      const TTL = 24 * 60 * 60 * 1000; // 24h - domain info changes rarely
+      const now = Date.now();
+      if (!force) {
+        const cached = localStorage.getItem(CACHE_KEY);
+        const cachedTime = Number(localStorage.getItem(CACHE_TIME_KEY) || '0');
+        if (cached && cachedTime && now - cachedTime < TTL) {
+          try {
+            setDomainInfo(JSON.parse(cached));
+            setLoadingDomain(false);
+            return; // Return early with cached data
+          } catch {}
+        }
+      }
+
+      const url = force ? '/api/domain/info?skipCache=1' : '/api/domain/info';
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (res.ok) {
+        setDomainInfo(data.info);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data.info));
+          localStorage.setItem(CACHE_TIME_KEY, String(Date.now()));
+        } catch {}
+      }
+    } catch (e: any) {
+      // Non-fatal for page
+      console.warn('Failed to fetch domain info', e);
+    } finally {
+      setLoadingDomain(false);
+    }
+  }
+
+  async function fetchNameservers() {
+    try {
+      setLoadingNS(true);
+      setError(null);
+      const res = await fetch('/api/domain/nameservers', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch nameservers');
+      }
+      setNameservers(Array.isArray(data.nameservers) ? data.nameservers : []);
+      // If domain info not set yet, hydrate from here
+      if (!domainInfo && data.info) setDomainInfo(data.info);
+    } catch (e: any) {
+      console.error('Failed to fetch nameservers', e);
+      setError(e?.message || 'Failed to fetch nameservers');
+    } finally {
+      setLoadingNS(false);
+    }
+  }
+
+  async function refreshAll() {
+    await Promise.all([
+      fetchRecords(),
+      fetchDomainInfo(true),
+      fetchNameservers(),
+    ]);
+  }
+
+  function startAddNS() {
+    setAddingNS(true);
+    setNewNSValue('');
+  }
+
+  function cancelAddNS() {
+    setAddingNS(false);
+    setNewNSValue('');
+  }
+
+  async function saveNewNS() {
+    if (!newNSValue.trim()) return;
+    try {
+      setSavingNS(true);
+      const next = [...nameservers, newNSValue.trim()];
+      const res = await fetch('/api/domain/nameservers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ nameservers: next }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((data as any).error || 'Failed to save nameserver');
+      setAddingNS(false);
+      setNewNSValue('');
+      await fetchNameservers();
+      await fetchDomainInfo(true);
+    } catch (e: any) {
+      setError(e?.message || 'Failed to save nameserver');
+    } finally {
+      setSavingNS(false);
+    }
+  }
+
+  function startEditNS(index: number) {
+    setEditingNS(index);
+    setEditNSValue(nameservers[index] || '');
+  }
+
+  function cancelEditNS() {
+    setEditingNS(null);
+    setEditNSValue('');
+  }
+
+  async function saveEditNS(index: number) {
+    if (index < 0 || index >= nameservers.length) return;
+    try {
+      setSavingNS(true);
+      const next = nameservers.slice();
+      next[index] = editNSValue.trim();
+      const res = await fetch('/api/domain/nameservers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ nameservers: next }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((data as any).error || 'Failed to update nameserver');
+      setEditingNS(null);
+      await fetchNameservers();
+      await fetchDomainInfo(true);
+    } catch (e: any) {
+      setError(e?.message || 'Failed to update nameserver');
+    } finally {
+      setSavingNS(false);
+    }
+  }
+
+  async function deleteNameserver(index: number) {
+    if (index < 0 || index >= nameservers.length) return;
+    if (!confirm('Delete this nameserver?')) return;
+    try {
+      setSavingNS(true);
+      const next = nameservers.filter((_, i) => i !== index);
+      const res = await fetch('/api/domain/nameservers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ nameservers: next }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error((data as any).error || 'Failed to delete nameserver');
+      await fetchNameservers();
+      await fetchDomainInfo(true);
+    } catch (e: any) {
+      setError(e?.message || 'Failed to delete nameserver');
+    } finally {
+      setSavingNS(false);
+    }
+  }
 
   async function addRecord() {
     setAdding(true);
@@ -188,23 +362,77 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h3 className={styles.title}>DNS Records Manager</h3>
-        <div className={styles.actions}>
-          <button className={styles.button} onClick={fetchRecords} disabled={loading}>
-            <RefreshCw size={16} />
-            {loading ? 'Refreshing…' : 'Refresh'}
-          </button>
-          <button className={styles.buttonPrimary} onClick={() => setShowVerificationForm(!showVerificationForm)}>
-            <Shield size={16} />
-            Generate Verification
-          </button>
-          <button className={styles.buttonPrimary} onClick={() => setShowAddForm(!showAddForm)}>
-            <Plus size={16} />
-            Add Record
-          </button>
-        </div>
+      <div className={styles2.pageHeader} style={{marginBottom: "22px"}}>
+        <h1>Domain Manager</h1>
+        <button className={styles.buttonPrimary} onClick={refreshAll} disabled={loading || loadingNS || loadingDomain}>
+          <RefreshCw size={16} />
+          {(loading || loadingNS || loadingDomain) ? 'Refreshing…' : 'Refresh All'}
+        </button>
       </div>
+
+      {/* Domain Expiry Warning Banner */}
+      {domainInfo && domainInfo.expires && (() => {
+        const expiryDate = new Date(domainInfo.expires);
+        const now = new Date();
+        const daysUntilExpiry = Math.floor((expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (daysUntilExpiry <= 30 && daysUntilExpiry >= 0) {
+          return (
+            <div style={{
+              padding: '12px 16px',
+              background: daysUntilExpiry <= 7 ? '#ffe5e5' : '#fff8e1',
+              border: `1px solid ${daysUntilExpiry <= 7 ? '#ff4444' : '#ffa726'}`,
+              borderRadius: 8,
+              marginBottom: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12
+            }}>
+              <span style={{ fontSize: 20 }}>⚠️</span>
+              <div>
+                <strong>Domain Expiring Soon</strong>
+                <p style={{ margin: '4px 0 0 0', fontSize: 14 }}>
+                  Your domain expires in {daysUntilExpiry} day{daysUntilExpiry !== 1 ? 's' : ''}. Renew it to avoid service disruption.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        return null;
+      })()}
+
+      {/* Domain Info */}
+      {domainInfo && (
+        <div className={styles.sectionCard}>
+          <h4>Domain Information</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginTop: 12 }}>
+            <div>
+              <div style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', fontWeight: 600, marginBottom: 4 }}>Domain</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{domainInfo.domain || '—'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', fontWeight: 600, marginBottom: 4 }}>Created</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{domainInfo.created || '—'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', fontWeight: 600, marginBottom: 4 }}>Expires</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{domainInfo.expires || '—'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', fontWeight: 600, marginBottom: 4 }}>Status</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{domainInfo.status || '—'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', fontWeight: 600, marginBottom: 4 }}>Locked</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{domainInfo.locked || '—'}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: '#666', textTransform: 'uppercase', fontWeight: 600, marginBottom: 4 }}>Privacy</div>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{domainInfo.private || '—'}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Verification Form */}
       {showVerificationForm && (
@@ -308,7 +536,21 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
       )}
 
       {/* Records Table */}
-      <table className={styles.table}>
+      <div className={styles.sectionCard}>
+        <div className={styles.sectionHeader}>
+          <h4>DNS Records</h4>
+          <div className={styles.actions}>
+            <button className={styles.buttonPrimary} onClick={() => setShowVerificationForm(!showVerificationForm)}>
+              <Shield size={16} />
+              Generate Verification
+            </button>
+            <button className={styles.buttonPrimary} onClick={() => setShowAddForm(!showAddForm)}>
+              <Plus size={16} />
+              Add Record
+            </button>
+          </div>
+        </div>
+        <table className={styles.table}>
         <thead>
           <tr>
             <th>Type</th>
@@ -391,7 +633,114 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
             </tr>
           )}
         </tbody>
-      </table>
+        </table>
+      </div>
+
+      {/* Nameservers */}
+      <div className={styles.sectionCard}>
+        <div className={styles.sectionHeader}>
+          <h4>Name Servers</h4>
+          <div className={styles.actions}>
+            <button className={styles.buttonPrimary} onClick={startAddNS} disabled={savingNS || addingNS}>
+              <Plus size={16} />
+              Add Nameserver
+            </button>
+          </div>
+        </div>
+
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th style={{ width: '80px' }}>Position</th>
+              <th>Nameserver</th>
+              <th style={{ width: '120px' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {addingNS && (
+              <tr>
+                <td className={styles.mono}>NS{nameservers.length + 1}</td>
+                <td>
+                  <input
+                    className={styles.input}
+                    placeholder="ns1.example.com"
+                    value={newNSValue}
+                    onChange={(e) => setNewNSValue(e.target.value)}
+                    autoFocus
+                  />
+                </td>
+                <td>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    <button className={styles.buttonSmall} onClick={saveNewNS} disabled={savingNS}>
+                      <Check size={14} />
+                    </button>
+                    <button className={styles.buttonSmall} onClick={cancelAddNS} disabled={savingNS}>
+                      <X size={14} />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )}
+            {nameservers.map((ns, idx) => (
+              editingNS === idx ? (
+                <tr key={idx}>
+                  <td className={styles.mono}>NS{idx + 1}</td>
+                  <td>
+                    <input
+                      className={styles.input}
+                      value={editNSValue}
+                      onChange={(e) => setEditNSValue(e.target.value)}
+                      autoFocus
+                    />
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button className={styles.buttonSmall} onClick={() => saveEditNS(idx)} disabled={savingNS}>
+                        <Check size={14} />
+                      </button>
+                      <button className={styles.buttonSmall} onClick={cancelEditNS} disabled={savingNS}>
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                <tr key={idx}>
+                  <td className={styles.mono}>NS{idx + 1}</td>
+                  <td className={styles.mono}>{ns}</td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button className={styles.buttonSmall} onClick={() => startEditNS(idx)} disabled={savingNS}>
+                        <Edit2 size={14} />
+                      </button>
+                      <button className={`${styles.buttonSmall} ${styles.danger}`} onClick={() => deleteNameserver(idx)} disabled={savingNS}>
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )
+            ))}
+            {nameservers.length === 0 && !loadingNS && !addingNS && (
+              <tr>
+                <td colSpan={3} style={{ textAlign: 'center', padding: 24, color: '#999' }}>
+                  No nameservers configured. Click "Add Nameserver" to create one.
+                </td>
+              </tr>
+            )}
+            {loadingNS && (
+              <tr>
+                <td colSpan={3} style={{ textAlign: 'center', padding: 24 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                    <RefreshCw size={16} className={styles.spinner} />
+                    <span>Loading nameservers…</span>
+                  </div>
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

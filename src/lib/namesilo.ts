@@ -79,19 +79,34 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
   return parsed as T;
 }
 
-export async function listDnsRecords(): Promise<NameSiloDnsRecord[]> {
+// Server-side cache for domain info and DNS records
+let domainInfoCache: { data: any; timestamp: number } | null = null;
+const DOMAIN_INFO_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours (domain info changes rarely)
+
+let dnsRecordsCache: { data: NameSiloDnsRecord[]; timestamp: number } | null = null;
+const DNS_RECORDS_CACHE_TTL = 2 * 60 * 60 * 1000; // 2 hours (DNS records are manual changes)
+
+export async function listDnsRecords(skipCache = false): Promise<NameSiloDnsRecord[]> {
+  if (!skipCache && dnsRecordsCache) {
+    const age = Date.now() - dnsRecordsCache.timestamp;
+    if (age < DNS_RECORDS_CACHE_TTL) {
+      return dnsRecordsCache.data;
+    }
+  }
   const data = await callApi<any>('dnsListRecords', { domain: NAMESILO_DOMAIN });
   const reply = data?.namesilo?.reply ?? data?.reply;
   const rr = reply?.resource_record;
   if (!rr) return [];
   const arr: any[] = Array.isArray(rr) ? rr : [rr];
-  return arr.map((r: any) => ({
+  const records = arr.map((r: any) => ({
     record_id: String(r.record_id),
     type: String(r.type),
     host: String(r.host),
     value: String(r.value),
     ttl: String(r.ttl),
   }));
+  dnsRecordsCache = { data: records, timestamp: Date.now() };
+  return records;
 }
 
 export async function addDnsRecord(
@@ -113,8 +128,10 @@ export async function addDnsRecord(
   if (type === 'MX' && distance !== undefined) {
     params.rrdistance = distance;
   }
-  
-  return callApi('dnsAddRecord', params);
+  const res = await callApi('dnsAddRecord', params);
+  // Invalidate cache after mutation
+  dnsRecordsCache = null;
+  return res;
 }
 
 export async function updateDnsRecord(
@@ -135,15 +152,93 @@ export async function updateDnsRecord(
   if (distance !== undefined) {
     params.rrdistance = distance;
   }
-  
-  return callApi('dnsUpdateRecord', params);
+  const res = await callApi('dnsUpdateRecord', params);
+  dnsRecordsCache = null;
+  return res;
 }
 
 export async function deleteRecord(recordId: string) {
-  return callApi('dnsDeleteRecord', {
+  const res = await callApi('dnsDeleteRecord', {
     domain: NAMESILO_DOMAIN,
     rrid: recordId,
   });
+  dnsRecordsCache = null;
+  return res;
 }
 
+// Fetch domain information (creation, expiry, status, nameservers, contacts) with caching
+export async function getDomainInfo(domain?: string, skipCache = false): Promise<any> {
+  const targetDomain = domain || NAMESILO_DOMAIN;
+  if (!domain && !skipCache && domainInfoCache) {
+    const age = Date.now() - domainInfoCache.timestamp;
+    if (age < DOMAIN_INFO_CACHE_TTL) {
+      return domainInfoCache.data;
+    }
+  }
+  const data = await callApi<any>('getDomainInfo', { domain: targetDomain });
+  const reply = (data as any)?.namesilo?.reply ?? (data as any)?.reply ?? {};
 
+  // Normalize nameservers to a simple string array
+  const rawNs = reply?.nameservers;
+  let nameservers: string[] = [];
+  if (Array.isArray(rawNs)) {
+    // Could be array of strings or array of objects { nameserver, position }
+    nameservers = rawNs.map((ns: any) => (typeof ns === 'string' ? ns : ns?.nameserver)).filter(Boolean);
+  } else if (rawNs && typeof rawNs === 'object') {
+    // Some responses return an object with array under nameservers
+    const arr = (rawNs as any);
+    if (Array.isArray(arr)) {
+      nameservers = arr.map((ns: any) => (typeof ns === 'string' ? ns : ns?.nameserver)).filter(Boolean);
+    } else if (Array.isArray(arr?.nameserver)) {
+      nameservers = arr.nameserver.map((ns: any) => (typeof ns === 'string' ? ns : ns?.nameserver)).filter(Boolean);
+    }
+  }
+
+  const normalized = {
+    domain: targetDomain,
+    code: Number(reply?.code ?? 0),
+    detail: String(reply?.detail ?? ''),
+    created: reply?.created,
+    expires: reply?.expires,
+    status: reply?.status,
+    locked: reply?.locked,
+    private: reply?.private,
+    auto_renew: reply?.auto_renew,
+    traffic_type: reply?.traffic_type,
+    email_verification_required: reply?.email_verification_required,
+    portfolio: reply?.portfolio,
+    forward_url: reply?.forward_url,
+    forward_type: reply?.forward_type,
+    nameservers,
+    contact_ids: reply?.contact_ids,
+  };
+  if (!domain) {
+    domainInfoCache = { data: normalized, timestamp: Date.now() };
+  }
+  return normalized;
+}
+
+// For compatibility with existing code that expects a WHOIS function
+export async function getWhoisInfo(domain?: string): Promise<any> {
+  return getDomainInfo(domain);
+}
+
+// Change nameservers
+export async function changeNameServers(nameservers: string[], domain?: string) {
+  const targetDomain = domain || NAMESILO_DOMAIN;
+  const params: Record<string, string | number | undefined> = { domain: targetDomain };
+  nameservers.forEach((ns, idx) => {
+    const key = `ns${idx + 1}` as const;
+    (params as any)[key] = ns;
+  });
+  const res = await callApi('changeNameServers', params);
+  // Invalidate caches after change
+  dnsRecordsCache = null;
+  domainInfoCache = null;
+  return res;
+}
+
+// Expose manual cache clear if needed
+export function clearDnsCache() {
+  dnsRecordsCache = null;
+}
