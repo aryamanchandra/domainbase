@@ -39,7 +39,10 @@ async function callApi<T = any>(endpoint: string, params: Record<string, string 
     throw new Error('NAMESILO_API_KEY not configured');
   }
 
-  const url = `${NAMESILO_API_BASE}/${endpoint}?${buildQuery(params)}`;
+  // Ensure no double slashes in URL
+  const baseUrl = NAMESILO_API_BASE.replace(/\/$/, '');
+  const cleanEndpoint = endpoint.replace(/^\//, '');
+  const url = `${baseUrl}/${cleanEndpoint}?${buildQuery(params)}`;
   console.log('[NameSilo] Calling:', url.replace(NAMESILO_API_KEY, 'xxx'));
   
   const text = await httpsGet(url);
