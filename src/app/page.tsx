@@ -364,7 +364,10 @@ export default function Home() {
               <h1>DNS Records</h1>
               <p>Manage NameSilo DNS records directly</p>
             </div>
-            <NameSiloManager token={token} />
+            <NameSiloManager 
+              token={token} 
+              subdomains={subdomains.map(s => ({ subdomain: s.subdomain, userId: s._id }))}
+            />
           </div>
         )}
 

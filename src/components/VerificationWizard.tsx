@@ -255,47 +255,11 @@ export default function VerificationWizard({ subdomain, token }: Props) {
                 disabled={loading || !selectedService}
                 className={styles.generateButton}
               >
-                {loading ? 'Generating...' : 'Generate Locally'}
+                {loading ? 'Generating...' : 'Generate Record'}
               </button>
-              <button
-                onClick={async () => {
-                  if (!selectedService) return;
-                  setLoading(true);
-                  try {
-                    // For verification records, all are TXT
-                    const host = selectedService === 'dkim'
-                      ? `default._domainkey.${subdomain}.aryamanchandra.com`
-                      : `${subdomain}.aryamanchandra.com`;
-                    const value = selectedService === 'spf'
-                      ? 'v=spf1 include:_spf.google.com ~all'
-                      : selectedService === 'dmarc'
-                        ? `v=DMARC1; p=quarantine; rua=mailto:${customOptions.email || 'admin@aryamanchandra.com'}; ruf=mailto:${customOptions.email || 'admin@aryamanchandra.com'}; fo=1`
-                        : selectedService === 'google-search-console'
-                          ? (customOptions.verificationCode || 'google-site-verification=YOUR_VERIFICATION_CODE')
-                          : (customOptions.dkimValue || 'v=DKIM1; k=rsa; p=YOUR_PUBLIC_KEY_HERE');
-
-                    await fetch('/api/dns/namesilo', {
-                      method: 'POST',
-                      headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`,
-                      },
-                      body: JSON.stringify({ type: 'TXT', host, value, ttl: 3600 }),
-                    });
-                    setShowForm(false);
-                    setSelectedService(null);
-                    setCustomOptions({});
-                  } catch (e) {
-                    console.error('Failed to create record via NameSilo', e);
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                disabled={loading || !selectedService}
-                className={styles.generateButton}
-              >
-                {loading ? 'Creating...' : 'Create via NameSilo'}
-              </button>
+              <p style={{ fontSize: 13, color: '#666', margin: '8px 0 0 0' }}>
+                💡 To add records directly to NameSilo, use the <strong>DNS Records</strong> page from the sidebar
+              </p>
             </div>
           </div>
         </div>

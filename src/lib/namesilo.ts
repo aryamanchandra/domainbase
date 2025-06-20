@@ -94,14 +94,49 @@ export async function listDnsRecords(): Promise<NameSiloDnsRecord[]> {
   }));
 }
 
-export async function addTxtRecord(host: string, value: string, ttl: number = 3600) {
-  return callApi('dnsAddRecord', {
+export async function addDnsRecord(
+  type: string,
+  host: string,
+  value: string,
+  ttl: number = 3600,
+  distance?: number
+) {
+  const params: Record<string, string | number | undefined> = {
     domain: NAMESILO_DOMAIN,
-    rrtype: 'TXT',
+    rrtype: type,
     rrhost: host,
     rrvalue: value,
     rrttl: ttl,
-  });
+  };
+  
+  // MX records require distance (priority)
+  if (type === 'MX' && distance !== undefined) {
+    params.rrdistance = distance;
+  }
+  
+  return callApi('dnsAddRecord', params);
+}
+
+export async function updateDnsRecord(
+  recordId: string,
+  host: string,
+  value: string,
+  ttl: number = 3600,
+  distance?: number
+) {
+  const params: Record<string, string | number | undefined> = {
+    domain: NAMESILO_DOMAIN,
+    rrid: recordId,
+    rrhost: host,
+    rrvalue: value,
+    rrttl: ttl,
+  };
+  
+  if (distance !== undefined) {
+    params.rrdistance = distance;
+  }
+  
+  return callApi('dnsUpdateRecord', params);
 }
 
 export async function deleteRecord(recordId: string) {

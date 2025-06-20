@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
-import { addTxtRecord, deleteRecord, listDnsRecords } from '@/lib/namesilo';
+import { addDnsRecord, updateDnsRecord, deleteRecord, listDnsRecords } from '@/lib/namesilo';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,14 +30,19 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { type, host, value, ttl, recordId } = body;
+    const { action, type, host, value, ttl, distance, recordId } = body;
 
-    if (type === 'TXT') {
-      await addTxtRecord(host, value, ttl ?? 3600);
+    if (action === 'ADD') {
+      await addDnsRecord(type, host, value, ttl ?? 3600, distance);
       return NextResponse.json({ success: true });
     }
 
-    if (type === 'DELETE' && recordId) {
+    if (action === 'UPDATE' && recordId) {
+      await updateDnsRecord(recordId, host, value, ttl ?? 3600, distance);
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === 'DELETE' && recordId) {
       await deleteRecord(recordId);
       return NextResponse.json({ success: true });
     }
