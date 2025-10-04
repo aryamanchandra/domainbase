@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const NAMESILO_DOMAIN = process.env.NAMESILO_DOMAIN || 'aryamanchandra.com';
+const NAMESILO_API_KEY = process.env.NAMESILO_API_KEY || '';
+
 export async function GET(request: NextRequest) {
   try {
     // Test what IP NameSilo sees when we call their API
     const namesiloTest = await fetch(
-      'https://www.namesilo.com/api/dnsListRecords?version=1&type=json&key=273fbb4e4d8028a72c008fa&domain=aryamanchandra.com',
+      `https://www.namesilo.com/api/dnsListRecords?version=1&type=json&key=${NAMESILO_API_KEY}&domain=${NAMESILO_DOMAIN}`,
       {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
