@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Shield, Mail, Search as SearchIcon, Copy, CheckCircle, Plus, X } from 'lucide-react';
 import styles from './VerificationWizard.module.css';
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 interface VerificationRecord {
   _id?: string;
   service: string;
@@ -115,7 +117,7 @@ export default function VerificationWizard({ subdomain, token }: Props) {
     setTimeout(() => setCopiedField(null), 2000);
   };
 
-  const fqdn = `${subdomain}.aryamanchandra.com`;
+  const fqdn = `${subdomain}.${ROOT_DOMAIN}`;
 
   const filteredRecords = records.filter(r => filter === 'all' ? true : r.service === filter);
 
@@ -200,7 +202,7 @@ export default function VerificationWizard({ subdomain, token }: Props) {
                 <label>Email for Reports</label>
                 <input
                   type="email"
-                  placeholder="admin@aryamanchandra.com"
+                  placeholder={`admin@${ROOT_DOMAIN}`}
                   value={customOptions.email || ''}
                   onChange={(e) =>
                     setCustomOptions({ ...customOptions, email: e.target.value })

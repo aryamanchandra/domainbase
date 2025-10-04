@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { RefreshCw, Search } from 'lucide-react';
 import styles from './WhoisLookup.module.css';
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 interface Props {
   token: string;
 }
 
 export default function WhoisLookup({ token }: Props) {
-  const [domain, setDomain] = useState('aryamanchandra.com');
+  const [domain, setDomain] = useState(ROOT_DOMAIN);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<any | null>(null);

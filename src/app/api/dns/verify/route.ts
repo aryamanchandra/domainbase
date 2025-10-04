@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { getDb } from '@/lib/mongodb';
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 export interface VerificationRecord {
   _id?: string;
   subdomain: string;
@@ -16,7 +18,7 @@ export interface VerificationRecord {
 
 // Generate verification records for different services
 function generateVerificationRecords(subdomain: string, service: string, options?: any): Partial<VerificationRecord> | null {
-  const domain = `${subdomain}.aryamanchandra.com`;
+  const domain = `${subdomain}.${ROOT_DOMAIN}`;
   
   switch (service) {
     case 'spf':
@@ -37,7 +39,7 @@ function generateVerificationRecords(subdomain: string, service: string, options
       };
       
     case 'dmarc':
-      const email = options?.email || 'admin@aryamanchandra.com';
+      const email = options?.email || `admin@${ROOT_DOMAIN}`;
       return {
         service: 'dmarc',
         recordType: 'TXT',

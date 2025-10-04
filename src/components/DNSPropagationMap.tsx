@@ -5,6 +5,8 @@ import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps
 import { Globe as GlobeIcon, RefreshCw, CheckCircle, XCircle, Clock, Zap } from 'lucide-react';
 import styles from './DNSPropagationMap.module.css';
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 interface PropagationResult {
   server: {
     name: string;
@@ -47,7 +49,7 @@ export default function DNSPropagationMap({ subdomain, token }: Props) {
   const [customDomain, setCustomDomain] = useState('');
 
   const checkPropagation = async () => {
-    const domain = customDomain || `${subdomain}.aryamanchandra.com`;
+    const domain = customDomain || `${subdomain}.${ROOT_DOMAIN}`;
     setLoading(true);
     setSelectedMarker(null);
 
@@ -112,7 +114,7 @@ export default function DNSPropagationMap({ subdomain, token }: Props) {
           <GlobeIcon size={18} className={styles.inputIcon} />
           <input
             type="text"
-            placeholder={`${subdomain}.aryamanchandra.com`}
+            placeholder={`${subdomain}.${ROOT_DOMAIN}`}
             value={customDomain}
             onChange={(e) => setCustomDomain(e.target.value)}
             className={styles.domainInput}

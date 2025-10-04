@@ -31,6 +31,8 @@ const WhoisLookup = dynamic(() => import('@/components/WhoisLookup'), {
   loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading WHOIS…</div>
 });
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 interface Subdomain {
   _id: string;
   subdomain: string;
@@ -476,12 +478,12 @@ export default function Home() {
                 <div className={styles.detailsInfo}>
                   <h1>{selectedSubdomain.title}</h1>
                   <a 
-                    href={`http://${selectedSubdomain.subdomain}.aryamanchandra.com`}
+                    href={`http://${selectedSubdomain.subdomain}.${ROOT_DOMAIN}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.detailsUrl}
                   >
-                    {selectedSubdomain.subdomain}.aryamanchandra.com
+                    {selectedSubdomain.subdomain}.{ROOT_DOMAIN}
                     <ExternalLink size={16} />
                   </a>
                 </div>
@@ -589,7 +591,7 @@ export default function Home() {
                       
                       <div className={styles.subdomainUrl}>
                         <Globe size={14} />
-                        <span>{sub.subdomain}.aryamanchandra.com</span>
+                        <span>{sub.subdomain}.{ROOT_DOMAIN}</span>
                       </div>
                       
                       {sub.description && (
@@ -622,7 +624,7 @@ export default function Home() {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            window.open(`http://${sub.subdomain}.aryamanchandra.com`, '_blank');
+                            window.open(`http://${sub.subdomain}.${ROOT_DOMAIN}`, '_blank');
                           }} 
                           className={styles.iconButton}
                           title="Open"
@@ -758,7 +760,7 @@ export default function Home() {
                 Are you sure you want to delete <strong>{deleteConfirm.title}</strong>?
               </p>
               <p className={styles.confirmSubtext}>
-                {deleteConfirm.subdomain}.aryamanchandra.com
+                {deleteConfirm.subdomain}.{ROOT_DOMAIN}
               </p>
               <p className={styles.confirmWarning}>
                 This action cannot be undone. All data and analytics for this subdomain will be permanently deleted.

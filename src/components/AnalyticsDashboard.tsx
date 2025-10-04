@@ -5,6 +5,8 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { TrendingUp, Users, Eye, Monitor, Globe, ExternalLink } from 'lucide-react';
 import styles from './AnalyticsDashboard.module.css';
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 interface AnalyticsData {
   totalViews: number;
   uniqueVisitors: number;
@@ -75,7 +77,7 @@ export default function AnalyticsDashboard({ subdomain, token }: Props) {
       <div className={styles.header}>
         <div>
           <h2>Analytics Dashboard</h2>
-          <p className={styles.subtitle}>{subdomain}.aryamanchandra.com</p>
+          <p className={styles.subtitle}>{subdomain}.{ROOT_DOMAIN}</p>
         </div>
         <div className={styles.periodSelector}>
           <button 

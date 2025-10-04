@@ -5,6 +5,8 @@ import { Search, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-rea
 import dynamic from 'next/dynamic';
 import styles from './DNSChecker.module.css';
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 const DNSPropagationMap = dynamic(() => import('./DNSPropagationMap'), {
   ssr: false,
   loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading propagation map...</div>
@@ -28,7 +30,7 @@ export default function DNSChecker({ subdomain, token }: Props) {
   const [customDomain, setCustomDomain] = useState('');
 
   const checkDNS = async () => {
-    const domain = customDomain || `${subdomain}.aryamanchandra.com`;
+    const domain = customDomain || `${subdomain}.${ROOT_DOMAIN}`;
     setLoading(true);
 
     try {
@@ -92,7 +94,7 @@ export default function DNSChecker({ subdomain, token }: Props) {
           <Search size={18} className={styles.searchIcon} />
           <input
             type="text"
-            placeholder={`${subdomain}.aryamanchandra.com`}
+            placeholder={`${subdomain}.${ROOT_DOMAIN}`}
             value={customDomain}
             onChange={(e) => setCustomDomain(e.target.value)}
             className={styles.input}

@@ -5,6 +5,8 @@ import { RefreshCw, Plus, Shield, Edit2, Trash2, Check, X } from 'lucide-react';
 import styles from './NameSiloManager.module.css';
 import styles2 from '../app/page.module.css';
 
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+
 interface Props {
   token: string;
   subdomains?: Array<{ subdomain: string; userId: string }>;
@@ -346,9 +348,8 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
       return;
     }
     
-    const domain = 'aryamanchandra.com'; // From env
     const code = `verify-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
-    const host = `_verify.${verifySubdomain}.${domain}`;
+    const host = `_verify.${verifySubdomain}.${ROOT_DOMAIN}`;
     
     setAddType('TXT');
     setAddHost(host);
