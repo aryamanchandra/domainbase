@@ -5,7 +5,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { TrendingUp, Users, Eye, Monitor, Globe, ExternalLink } from 'lucide-react';
 import styles from './AnalyticsDashboard.module.css';
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 interface AnalyticsData {
   totalViews: number;

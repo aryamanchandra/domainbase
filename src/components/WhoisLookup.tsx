@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { RefreshCw, Search } from 'lucide-react';
 import styles from './WhoisLookup.module.css';
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 interface Props {
   token: string;

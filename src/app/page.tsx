@@ -31,7 +31,7 @@ const WhoisLookup = dynamic(() => import('@/components/WhoisLookup'), {
   loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading WHOIS…</div>
 });
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 interface Subdomain {
   _id: string;

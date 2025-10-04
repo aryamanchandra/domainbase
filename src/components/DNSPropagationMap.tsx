@@ -5,7 +5,7 @@ import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps
 import { Globe as GlobeIcon, RefreshCw, CheckCircle, XCircle, Clock, Zap } from 'lucide-react';
 import styles from './DNSPropagationMap.module.css';
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 interface PropagationResult {
   server: {

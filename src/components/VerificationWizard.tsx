@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Shield, Mail, Search as SearchIcon, Copy, CheckCircle, Plus, X } from 'lucide-react';
 import styles from './VerificationWizard.module.css';
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 interface VerificationRecord {
   _id?: string;

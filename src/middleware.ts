@@ -4,7 +4,7 @@ export function middleware(request: NextRequest) {
   const url = request.nextUrl;
   const hostname = request.headers.get('host') || '';
   
-  const rootDomain = process.env.ROOT_DOMAIN || 'aryamanchandra.com';
+  const rootDomain = process.env.ROOT_DOMAIN!;
   const adminSubdomain = process.env.ADMIN_SUBDOMAIN || 'admin';
   
   // Remove port for development

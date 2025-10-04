@@ -5,7 +5,7 @@ import { Search, CheckCircle, XCircle, AlertCircle, RefreshCw } from 'lucide-rea
 import dynamic from 'next/dynamic';
 import styles from './DNSChecker.module.css';
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 const DNSPropagationMap = dynamic(() => import('./DNSPropagationMap'), {
   ssr: false,

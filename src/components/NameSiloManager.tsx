@@ -5,7 +5,7 @@ import { RefreshCw, Plus, Shield, Edit2, Trash2, Check, X } from 'lucide-react';
 import styles from './NameSiloManager.module.css';
 import styles2 from '../app/page.module.css';
 
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'aryamanchandra.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 interface Props {
   token: string;

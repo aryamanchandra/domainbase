@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const NAMESILO_DOMAIN = process.env.NAMESILO_DOMAIN || 'aryamanchandra.com';
-const NAMESILO_API_KEY = process.env.NAMESILO_API_KEY || '';
+const NAMESILO_DOMAIN = process.env.NAMESILO_DOMAIN!;
+const NAMESILO_API_KEY = process.env.NAMESILO_API_KEY!;
 
 export async function GET(request: NextRequest) {
   try {

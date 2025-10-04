@@ -1,9 +1,9 @@
 import crypto from 'crypto';
 import https from 'https';
 
-const NAMESILO_API_KEY = process.env.NAMESILO_API_KEY || '';
+const NAMESILO_API_KEY = process.env.NAMESILO_API_KEY!;
 const NAMESILO_API_BASE = process.env.NAMESILO_API_BASE || 'https://www.namesilo.com/api';
-const NAMESILO_DOMAIN = process.env.NAMESILO_DOMAIN || 'aryamanchandra.com';
+const NAMESILO_DOMAIN = process.env.NAMESILO_DOMAIN!;
 
 export interface NameSiloDnsRecord {
   record_id: string;
