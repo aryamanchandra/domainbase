@@ -158,7 +158,7 @@ export default function DNSChecker({ subdomain, token }: Props) {
       {!records && !loading && (
         <div className={styles.placeholder}>
           <Search size={48} strokeWidth={1.5} />
-          <p>Enter a domain and click "Check DNS" to view records</p>
+          <p>Enter a domain and click &quot;Check DNS&quot; to view records</p>
         </div>
       )}
       </div>

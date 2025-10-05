@@ -81,7 +81,7 @@ export default function Home() {
     // Profile picture cache helpers
     const PROFILE_PIC_CACHE_KEY = 'cachedProfilePic';
     const PROFILE_PIC_CACHE_TIME_KEY = 'cachedProfilePicTime';
-    const PROFILE_PIC_CACHE_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
+    const PROFILE_PIC_CACHE_TTL = 90 * 24 * 60 * 60 * 1000; // 90 days
 
     async function cacheProfilePicture(url: string) {
       try {

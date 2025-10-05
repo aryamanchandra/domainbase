@@ -352,7 +352,7 @@ export default function VerificationWizard({ subdomain, token }: Props) {
         <div className={styles.empty}>
           <Shield size={48} strokeWidth={1.5} />
           <h4>No Verification Records</h4>
-          <p>Click "Add Record" to generate DNS verification records</p>
+          <p>Click &quot;Add Record&quot; to generate DNS verification records</p>
         </div>
       )}
     </div>

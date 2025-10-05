@@ -100,14 +100,14 @@ export async function POST(request: NextRequest) {
     }
 
     const db = await getDb();
-    const verificationRecord: VerificationRecord = {
+    const verificationRecord = {
       subdomain,
       ...recordData as any,
       status: 'pending',
       createdAt: new Date(),
     };
 
-    await db.collection('verification_records').insertOne(verificationRecord);
+    await db.collection('verification_records').insertOne(verificationRecord as any);
 
     return NextResponse.json({
       success: true,

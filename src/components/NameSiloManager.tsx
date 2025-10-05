@@ -629,7 +629,7 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
           {records.length === 0 && !loading && (
             <tr>
               <td colSpan={5} style={{ textAlign: 'center', padding: 24, color: '#999' }}>
-                No DNS records found. Click "Add Record" to create one.
+                No DNS records found. Click &quot;Add Record&quot; to create one.
               </td>
             </tr>
           )}
@@ -725,7 +725,7 @@ export default function NameSiloManager({ token, subdomains = [] }: Props) {
             {nameservers.length === 0 && !loadingNS && !addingNS && (
               <tr>
                 <td colSpan={3} style={{ textAlign: 'center', padding: 24, color: '#999' }}>
-                  No nameservers configured. Click "Add Nameserver" to create one.
+                  No nameservers configured. Click &quot;Add Nameserver&quot; to create one.
                 </td>
               </tr>
             )}

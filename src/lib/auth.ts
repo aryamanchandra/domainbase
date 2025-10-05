@@ -45,7 +45,7 @@ export async function createUser(
   const db = await getDb();
   const hashedPassword = password ? await hashPassword(password) : '';
   
-  const user: User = {
+  const user = {
     username,
     password: hashedPassword,
     role,
@@ -53,7 +53,7 @@ export async function createUser(
     ...oauthData,
   };
   
-  await db.collection('users').insertOne(user);
+  await db.collection('users').insertOne(user as any);
   return user;
 }
 
@@ -76,19 +76,19 @@ export async function findOrCreateOAuthUser(
     
     if (!user) {
       // Create new user
-      const newUser: User = {
+      const newUser = {
         username: email,
         email,
         name: userData.name,
         picture: userData.picture,
         googleId: userData.googleId,
         password: '', // No password for OAuth users
-        role: 'user',
+        role: 'user' as const,
         createdAt: new Date(),
       };
       
-      await db.collection('users').insertOne(newUser);
-      return newUser;
+      await db.collection('users').insertOne(newUser as any);
+      return newUser as User;
     } else {
       // Update existing user with Google ID
       await db.collection('users').updateOne(

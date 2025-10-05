@@ -60,7 +60,7 @@ export async function trackPageView(data: {
     else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
   }
   
-  const pageView: PageView = {
+  const pageView = {
     subdomain: data.subdomain,
     path: data.path,
     timestamp: new Date(),
@@ -72,7 +72,7 @@ export async function trackPageView(data: {
     os,
   };
   
-  await db.collection('pageviews').insertOne(pageView);
+  await db.collection('pageviews').insertOne(pageView as any);
 }
 
 export async function getAnalytics(

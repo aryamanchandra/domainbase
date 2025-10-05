@@ -116,10 +116,12 @@ export default function Sidebar({
           <div className={styles.userSection}>
             <div className={styles.userProfile}>
               {userInfo?.picture ? (
-                <img 
+                <Image 
                   src={userInfo.picture} 
                   alt={userInfo.name || 'User'} 
                   className={styles.userAvatar}
+                  width={40}
+                  height={40}
                 />
               ) : (
                 <div className={styles.userAvatarPlaceholder}>

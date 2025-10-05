@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const newSubdomain: Subdomain = {
+    const newSubdomain = {
       subdomain,
       title,
       description: description || '',
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
       metadata: metadata || {},
     };
 
-    const result = await db.collection('subdomains').insertOne(newSubdomain);
+    const result = await db.collection('subdomains').insertOne(newSubdomain as any);
 
     return NextResponse.json({
       success: true,

@@ -220,7 +220,6 @@ export default function DNSPropagationMap({ subdomain, token }: Props) {
                   key={index}
                   coordinates={result.server.coordinates}
                   onClick={() => setSelectedMarker(result)}
-                  style={{ cursor: 'pointer' }}
                 >
                   <circle
                     r={6}
