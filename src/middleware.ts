@@ -5,49 +5,32 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   
   const rootDomain = process.env.ROOT_DOMAIN!;
-  const adminSubdomain = process.env.ADMIN_SUBDOMAIN || 'admin';
   
   // Remove port for development
   const hostWithoutPort = hostname.split(':')[0];
   
-  // Check if this is the admin subdomain or localhost
-  if (
-    hostWithoutPort === `${adminSubdomain}.${rootDomain}` ||
-    hostWithoutPort === 'localhost'
-  ) {
-    // This is the admin dashboard, allow normal routing
+  // Check if this is localhost - allow normal routing
+  if (hostWithoutPort === 'localhost') {
     return NextResponse.next();
   }
   
-  // Check if this is the root domain or www - DON'T HANDLE THESE
-  // Let the existing website handle these
-  if (
-    hostWithoutPort === rootDomain ||
-    hostWithoutPort === `www.${rootDomain}`
-  ) {
-    // Return 404 or redirect - this app doesn't handle the main domain
-    // You can customize this behavior
-    return NextResponse.json(
-      { error: 'This domain is not managed by this application' },
-      { status: 404 }
-    );
-  }
-  
-  // Extract subdomain
-  const subdomain = hostWithoutPort.replace(`.${rootDomain}`, '');
-  
-  // Skip the admin subdomain from being treated as a content subdomain
-  if (subdomain === adminSubdomain) {
+  // Check if this is the root app domain (matches ROOT_DOMAIN exactly)
+  if (hostWithoutPort === rootDomain) {
+    // This is the main app, allow normal routing
     return NextResponse.next();
   }
   
-  // If subdomain exists and is not the host itself, rewrite to subdomain page
-  if (subdomain && subdomain !== hostWithoutPort) {
+  // Check if this is a subdomain of ROOT_DOMAIN
+  if (hostWithoutPort.endsWith(`.${rootDomain}`)) {
+    // Extract the subdomain part
+    const subdomain = hostWithoutPort.replace(`.${rootDomain}`, '');
+    
     // Rewrite to /subdomain/[subdomain] route
     url.pathname = `/subdomain/${subdomain}${url.pathname}`;
     return NextResponse.rewrite(url);
   }
   
+  // If we get here, the hostname doesn't match our domain at all
   return NextResponse.next();
 }
 
@@ -63,4 +46,3 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };
-
