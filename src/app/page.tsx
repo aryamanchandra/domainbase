@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { 
   Plus, Edit2, Trash2, ExternalLink, 
-  Globe, CheckCircle, XCircle, Search, BarChart3, Moon, Sun, Shield
+  Globe, CheckCircle, XCircle, Search, BarChart3, Moon, Sun
 } from 'lucide-react';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import NameSiloManager from '@/components/NameSiloManager';
@@ -19,11 +20,6 @@ const AnalyticsDashboard = dynamic(() => import('@/components/AnalyticsDashboard
 const DNSChecker = dynamic(() => import('@/components/DNSChecker'), {
   ssr: false,
   loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading DNS checker...</div>
-});
-
-const VerificationWizard = dynamic(() => import('@/components/VerificationWizard'), {
-  ssr: false,
-  loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading verification wizard...</div>
 });
 
 const WhoisLookup = dynamic(() => import('@/components/WhoisLookup'), {
@@ -64,7 +60,6 @@ export default function Home() {
   const [darkMode, setDarkMode] = useState(false);
   const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois'>('subdomains');
   const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
-  const [detailsTab, setDetailsTab] = useState<'analytics' | 'dns' | 'verification'>('analytics');
   const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -333,7 +328,6 @@ export default function Home() {
 
   const openDetails = (sub: Subdomain) => {
     setSelectedSubdomain(sub);
-    setDetailsTab('analytics');
     setCurrentView('details');
   };
 
@@ -376,7 +370,7 @@ export default function Home() {
         <div className={styles.loginWrapper}>
           <div className={styles.loginHeader}>
             <div className={styles.logoContainer}>
-              <Globe size={32} strokeWidth={2} />
+              <Image src="/logo.png" alt="Domainbase" width={48} height={48} className={styles.loginLogo} />
             </div>
             <h1 className={styles.loginTitle}>Welcome back</h1>
             <p className={styles.loginSubtitle}>Sign in with your Google account to manage subdomains</p>
@@ -497,30 +491,8 @@ export default function Home() {
               </div>
             </div>
 
-            <div className={styles.detailsTabs}>
-              <button
-                className={detailsTab === 'analytics' ? styles.activeTab : ''}
-                onClick={() => setDetailsTab('analytics')}
-              >
-                <BarChart3 size={18} />
-                <span>Analytics</span>
-              </button>
-              <button
-                className={detailsTab === 'verification' ? styles.activeTab : ''}
-                onClick={() => setDetailsTab('verification')}
-              >
-                <Shield size={18} />
-                <span>Verification</span>
-              </button>
-            </div>
-
             <div className={styles.detailsContent}>
-              {detailsTab === 'analytics' && (
-                <AnalyticsDashboard subdomain={selectedSubdomain.subdomain} token={token} />
-              )}
-              {detailsTab === 'verification' && (
-                <VerificationWizard subdomain={selectedSubdomain.subdomain} token={token} />
-              )}
+              <AnalyticsDashboard subdomain={selectedSubdomain.subdomain} token={token} />
             </div>
           </div>
         )}

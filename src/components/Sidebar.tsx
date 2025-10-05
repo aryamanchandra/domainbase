@@ -6,6 +6,7 @@ import {
   Home, Menu, X as CloseIcon, ChevronDown, ChevronLeft, ChevronRight
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
+import Image from 'next/image';
 
 interface Props {
   darkMode: boolean;
@@ -68,9 +69,9 @@ export default function Sidebar({
           {/* Logo */}
           <div className={styles.logo}>
             <div className={styles.logoIcon}>
-              <Globe size={24} strokeWidth={2.5} />
+              <Image src="/logo.png" alt="Domainbase" className={styles.logoIconImage} width={40} height={40} />
             </div>
-            {!isCollapsed && <span className={styles.logoText}>Subdomain Manager</span>}
+            {!isCollapsed && <span className={styles.logoText}>Domainbase</span>}
           </div>
 
           {/* Navigation */}
