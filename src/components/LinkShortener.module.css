@@ -357,22 +357,23 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .card:hover {
   border-color: #000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] .card {
-  background: #1a1a1a;
+  background: #000;
   border-color: #333;
 }
 
 [data-theme="dark"] .card:hover {
   border-color: #666;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.02);
 }
 
 .cardHeader {
@@ -390,9 +391,10 @@
 
 .cardTitle h3 {
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #000;
+  letter-spacing: -0.02em;
 }
 
 [data-theme="dark"] .cardTitle h3 {
@@ -400,52 +402,59 @@
 }
 
 .statusBadge {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 500;
-  background: #f5f5f5;
+  background: #fafafa;
   color: #666;
+  border: 1px solid #eaeaea;
 }
 
 .statusBadge[data-active="true"] {
-  background: #e6ffe6;
-  color: #008000;
+  background: #000;
+  color: #fff;
+  border-color: #000;
 }
 
 [data-theme="dark"] .statusBadge {
-  background: #222;
-  color: #999;
+  background: #111;
+  color: #888;
+  border-color: #333;
 }
 
 [data-theme="dark"] .statusBadge[data-active="true"] {
-  background: #003300;
-  color: #00ff00;
+  background: #fff;
+  color: #000;
+  border-color: #fff;
 }
 
 .shortUrl {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fafafa;
+  border: 1px solid #eaeaea;
+  border-radius: 6px;
 }
 
 .shortUrl code {
   flex: 1;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
   font-size: 13px;
-  color: #0070f3;
+  font-weight: 500;
+  color: #000;
   word-break: break-all;
 }
 
 [data-theme="dark"] .shortUrl {
-  background: #222;
+  background: #111;
+  border-color: #333;
 }
 
 [data-theme="dark"] .shortUrl code {
-  color: #00a8ff;
+  color: #fff;
 }
 
 .targetUrl {
@@ -512,12 +521,13 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   color: #666;
 }
 
 [data-theme="dark"] .stat {
-  color: #999;
+  color: #888;
 }
 
 .date {
@@ -562,22 +572,22 @@
 .actionButton:hover {
   border-color: #000;
   color: #000;
-  background: #f5f5f5;
+  background: #fafafa;
 }
 
 .deleteButton {
-  color: #dc2626;
-  border-color: #fee;
+  color: #666;
 }
 
 .deleteButton:hover {
-  border-color: #dc2626;
-  background: #fee;
+  border-color: #000;
+  background: #fafafa;
+  color: #000;
 }
 
 .iconButton:hover {
   border-color: #000;
-  background: #f5f5f5;
+  background: #fafafa;
   color: #000;
 }
 
@@ -585,28 +595,24 @@
 [data-theme="dark"] .deleteButton,
 [data-theme="dark"] .iconButton {
   border-color: #333;
-  color: #999;
+  color: #888;
 }
 
 [data-theme="dark"] .actionButton:hover {
   border-color: #666;
   color: #fff;
-  background: #222;
-}
-
-[data-theme="dark"] .deleteButton {
-  color: #f87171;
-  border-color: rgba(220, 38, 38, 0.2);
+  background: #111;
 }
 
 [data-theme="dark"] .deleteButton:hover {
-  border-color: #dc2626;
-  background: rgba(220, 38, 38, 0.1);
+  border-color: #666;
+  background: #111;
+  color: #fff;
 }
 
 [data-theme="dark"] .iconButton:hover {
   border-color: #666;
-  background: #222;
+  background: #111;
   color: #fff;
 }
 
