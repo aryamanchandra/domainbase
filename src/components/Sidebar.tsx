@@ -58,15 +58,6 @@ export default function Sidebar({
       {/* Sidebar */}
       <div className={`${styles.sidebar} ${isOpen ? styles.open : ''} ${isCollapsed ? styles.collapsed : ''}`}>
         <div className={styles.sidebarContent}>
-          {/* Collapse Toggle Button */}
-          <button 
-            className={styles.collapseToggle}
-            onClick={onToggleCollapse}
-            aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
-
           {/* Logo */}
           <div className={styles.logo}>
             <div className={styles.logoIcon}>
@@ -109,6 +100,16 @@ export default function Sidebar({
               {darkMode ? <Sun size={20} /> : <Moon size={20} />}
               {!isCollapsed && <span>{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
             </button>
+            
+            {/* Logout Button */}
+            <button 
+              className={styles.logoutButton}
+              onClick={onLogout}
+              title={isCollapsed ? 'Logout' : undefined}
+            >
+              <LogOut size={20} />
+              {!isCollapsed && <span>Logout</span>}
+            </button>
           </div>
 
           {/* User Profile */}
@@ -140,13 +141,15 @@ export default function Sidebar({
               )}
             </div>
 
+            {/* Collapse Toggle Button */}
             <button 
-              className={styles.logoutButton}
-              onClick={onLogout}
-              title={isCollapsed ? 'Logout' : undefined}
+              className={styles.collapseToggle}
+              onClick={onToggleCollapse}
+              aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              title={isCollapsed ? 'Expand sidebar' : undefined}
             >
-              <LogOut size={20} />
-              {!isCollapsed && <span>Logout</span>}
+              {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+              {!isCollapsed && <span>Collapse</span>}
             </button>
           </div>
         </div>
