@@ -1,19 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
+import NextLink from 'next/link';
 import { 
   Globe, LogOut, Moon, Sun, Search, Shield, BarChart3, 
   Home, Menu, X as CloseIcon, ChevronDown, ChevronLeft, ChevronRight, Link
 } from 'lucide-react';
-import styles from './Sidebar.module.css';
+import styles from '@/styles/Sidebar.module.css';
 import Image from 'next/image';
 
 interface Props {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onLogout: () => void;
-  currentView: 'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois' | 'links';
-  onNavigate: (view: 'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois' | 'links') => void;
   userInfo?: {
     name?: string;
     email?: string;
@@ -27,22 +27,27 @@ export default function Sidebar({
   darkMode, 
   onToggleDarkMode, 
   onLogout, 
-  currentView,
-  onNavigate,
   userInfo,
   isCollapsed,
   onToggleCollapse
 }: Props) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navigationItems = [
-    { id: 'subdomains' as const, label: 'Subdomains', icon: Home },
-    { id: 'links' as const, label: 'Link Shortener', icon: Link },
-    { id: 'dns' as const, label: 'DNS Checker', icon: Search },
-    { id: 'dns-records' as const, label: 'Domain Manager', icon: Shield },
-    { id: 'whois' as const, label: 'WHOIS Lookup', icon: Globe },
+    { path: '/subdomains', label: 'Subdomains', icon: Home },
+    { path: '/link-shortener', label: 'Link Shortener', icon: Link },
+    { path: '/dns-checker', label: 'DNS Checker', icon: Search },
+    { path: '/dns-records', label: 'Domain Manager', icon: Shield },
+    { path: '/whois', label: 'WHOIS Lookup', icon: Globe },
   ];
+
+  const isActive = (path: string) => {
+    if (path === '/subdomains') {
+      return pathname === '/subdomains' || pathname === '/';
+    }
+    return pathname?.startsWith(path);
+  };
 
   return (
     <>
@@ -71,18 +76,16 @@ export default function Sidebar({
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
-              <button
-                  key={item.id}
-                  className={`${styles.navItem} ${currentView === item.id ? styles.active : ''}`}
-                  onClick={() => {
-                    onNavigate(item.id);
-                    setIsOpen(false);
-                  }}
+                <NextLink
+                  key={item.path}
+                  href={item.path}
+                  className={`${styles.navItem} ${isActive(item.path) ? styles.active : ''}`}
+                  onClick={() => setIsOpen(false)}
                   title={isCollapsed ? item.label : undefined}
                 >
                   <Icon size={20} />
                   {!isCollapsed && <span>{item.label}</span>}
-                </button>
+                </NextLink>
               );
             })}
           </nav>
