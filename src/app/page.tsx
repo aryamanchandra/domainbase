@@ -27,6 +27,11 @@ const WhoisLookup = dynamic(() => import('@/components/WhoisLookup'), {
   loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading WHOIS…</div>
 });
 
+const LinkShortener = dynamic(() => import('@/components/LinkShortener'), {
+  ssr: false,
+  loading: () => <div style={{ padding: '40px', textAlign: 'center' }}>Loading Link Shortener…</div>
+});
+
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
 
 interface Subdomain {
@@ -58,7 +63,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [darkMode, setDarkMode] = useState(false);
-  const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois'>('subdomains');
+  const [currentView, setCurrentView] = useState<'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois' | 'links'>('subdomains');
   const [selectedSubdomain, setSelectedSubdomain] = useState<Subdomain | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ subdomain: string; title: string } | null>(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -453,6 +458,13 @@ export default function Home() {
               <p>Domain info from your NameSilo account</p>
             </div>
             <WhoisLookup token={token} />
+          </div>
+        )}
+
+        {/* Link Shortener */}
+        {currentView === 'links' && (
+          <div className={styles.pageContainer}>
+            <LinkShortener token={token} />
           </div>
         )}
 

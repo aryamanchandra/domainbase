@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { 
   Globe, LogOut, Moon, Sun, Search, Shield, BarChart3, 
-  Home, Menu, X as CloseIcon, ChevronDown, ChevronLeft, ChevronRight
+  Home, Menu, X as CloseIcon, ChevronDown, ChevronLeft, ChevronRight, Link
 } from 'lucide-react';
 import styles from './Sidebar.module.css';
 import Image from 'next/image';
@@ -12,8 +12,8 @@ interface Props {
   darkMode: boolean;
   onToggleDarkMode: () => void;
   onLogout: () => void;
-  currentView: 'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois';
-  onNavigate: (view: 'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois') => void;
+  currentView: 'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois' | 'links';
+  onNavigate: (view: 'subdomains' | 'dns' | 'details' | 'dns-records' | 'whois' | 'links') => void;
   userInfo?: {
     name?: string;
     email?: string;
@@ -38,6 +38,7 @@ export default function Sidebar({
 
   const navigationItems = [
     { id: 'subdomains' as const, label: 'Subdomains', icon: Home },
+    { id: 'links' as const, label: 'Link Shortener', icon: Link },
     { id: 'dns' as const, label: 'DNS Checker', icon: Search },
     { id: 'dns-records' as const, label: 'Domain Manager', icon: Shield },
     { id: 'whois' as const, label: 'WHOIS Lookup', icon: Globe },
@@ -79,7 +80,7 @@ export default function Sidebar({
             {navigationItems.map((item) => {
               const Icon = item.icon;
               return (
-                <button
+              <button
                   key={item.id}
                   className={`${styles.navItem} ${currentView === item.id ? styles.active : ''}`}
                   onClick={() => {

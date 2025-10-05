@@ -28,3 +28,19 @@ export interface User {
   createdAt: Date;
 }
 
+export interface ShortLink {
+  _id?: string;
+  slug: string; // e.g., "test", "promo"
+  targetUrl: string; // Full URL to redirect to
+  userId: string; // User who owns this link
+  clicks: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  expiresAt?: Date;
+  metadata?: {
+    title?: string;
+    description?: string;
+    [key: string]: any;
+  };
+}
