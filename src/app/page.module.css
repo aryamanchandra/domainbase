@@ -789,25 +789,27 @@
   background: white;
   border: 1px solid #eaeaea;
   border-radius: 12px;
-  padding: 20px;
-  transition: all 0.2s ease;
+  padding: 24px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   gap: 16px;
+  position: relative;
 }
 
 [data-theme="dark"] .card {
-  background: #111;
+  background: #000;
   border-color: #333;
 }
 
 .card:hover {
-  border-color: #ccc;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  border-color: #000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] .card:hover {
-  border-color: #555;
+  border-color: #666;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.02);
 }
 
 .cardHeader {
@@ -839,22 +841,37 @@
 .statusBadge {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
+  border: 1px solid;
 }
 
 .statusBadge[data-active="true"] {
-  background: #ecfdf5;
-  color: #059669;
+  background: #000;
+  color: #fff;
+  border-color: #000;
 }
 
 .statusBadge[data-active="false"] {
-  background: #fef2f2;
-  color: #dc2626;
+  background: #fafafa;
+  color: #666;
+  border-color: #eaeaea;
+}
+
+[data-theme="dark"] .statusBadge[data-active="true"] {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+[data-theme="dark"] .statusBadge[data-active="false"] {
+  background: #111;
+  color: #888;
+  border-color: #333;
 }
 
 .subdomainLink {
@@ -925,7 +942,7 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .actionButton:hover {
@@ -936,13 +953,13 @@
 
 [data-theme="dark"] .actionButton {
   border-color: #333;
-  color: #999;
+  color: #888;
 }
 
 [data-theme="dark"] .actionButton:hover {
   border-color: #666;
   color: #fff;
-  background: #1a1a1a;
+  background: #111;
 }
 
 .deleteButton {
@@ -953,18 +970,30 @@
   gap: 6px;
   padding: 8px 12px;
   background: transparent;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+  color: #666;
+  border: 1px solid #eaeaea;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .deleteButton:hover {
-  background: #fef2f2;
-  border-color: #dc2626;
+  background: #fafafa;
+  border-color: #000;
+  color: #000;
+}
+
+[data-theme="dark"] .deleteButton {
+  border-color: #333;
+  color: #888;
+}
+
+[data-theme="dark"] .deleteButton:hover {
+  border-color: #666;
+  background: #111;
+  color: #fff;
 }
 
 /* Error Alert */
@@ -1019,27 +1048,28 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: #0070f3;
-  border: none;
+  background: #000;
+  border: 1px solid #000;
   color: white;
   border-radius: 6px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .detailsButton:hover {
-  background: #0060df;
-  transform: translateY(-1px);
+  background: #111;
 }
 
 [data-theme="dark"] .detailsButton {
-  background: #0070f3;
+  background: #fff;
+  border-color: #fff;
+  color: #000;
 }
 
 [data-theme="dark"] .detailsButton:hover {
-  background: #0060df;
+  background: #f0f0f0;
 }
 
 /* Details Page */
@@ -1220,11 +1250,19 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: rgba(255, 0, 128, 0.1);
+  background: #fafafa;
+  border: 1px solid #eaeaea;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 20px;
+  color: #666;
+}
+
+[data-theme="dark"] .confirmIcon {
+  background: #111;
+  border-color: #333;
+  color: #888;
 }
 
 .confirmCard h3 {
@@ -1268,17 +1306,18 @@
 
 .confirmWarning {
   padding: 12px 16px;
-  background: rgba(255, 0, 128, 0.05);
-  border: 1px solid rgba(255, 0, 128, 0.2);
+  background: #fafafa;
+  border: 1px solid #eaeaea;
   border-radius: 8px;
   font-size: 13px !important;
-  color: #ff0080 !important;
+  color: #666 !important;
   margin-bottom: 24px !important;
 }
 
 [data-theme="dark"] .confirmWarning {
-  background: rgba(255, 0, 128, 0.1);
-  border-color: rgba(255, 0, 128, 0.3);
+  background: #111;
+  border-color: #333;
+  color: #888 !important;
 }
 
 .confirmActions {
@@ -1323,19 +1362,27 @@
 }
 
 .confirmDelete {
-  background: #ff0080;
-  border: none;
+  background: #000;
+  border: 1px solid #000;
   color: white;
 }
 
 .confirmDelete:hover {
-  background: #e60073;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 0, 128, 0.3);
+  background: #111;
 }
 
 .confirmDelete:active {
-  transform: translateY(0);
+  transform: none;
+}
+
+[data-theme="dark"] .confirmDelete {
+  background: #fff;
+  border-color: #fff;
+  color: #000;
+}
+
+[data-theme="dark"] .confirmDelete:hover {
+  background: #f0f0f0;
 }
 
 @media (max-width: 768px) {
@@ -1570,32 +1617,37 @@
 .detailsBadge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 14px;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
+  border: 1px solid;
 }
 
 .detailsBadge[data-active="true"] {
-  background: #e6f7ed;
-  color: #059669;
+  background: #000;
+  color: #fff;
+  border-color: #000;
 }
 
 .detailsBadge[data-active="false"] {
-  background: #fee;
-  color: #dc2626;
+  background: #fafafa;
+  color: #666;
+  border-color: #eaeaea;
 }
 
 [data-theme="dark"] .detailsBadge[data-active="true"] {
-  background: rgba(5, 150, 105, 0.1);
-  color: #34d399;
+  background: #fff;
+  color: #000;
+  border-color: #fff;
 }
 
 [data-theme="dark"] .detailsBadge[data-active="false"] {
-  background: rgba(220, 38, 38, 0.1);
-  color: #f87171;
+  background: #111;
+  color: #888;
+  border-color: #333;
 }
 
 .detailsTabs {
@@ -1672,34 +1724,6 @@
   }
 }
 
-.card {
-  background: white;
-  border: 1px solid #eaeaea;
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  transition: all 0.2s;
-  cursor: pointer;
-}
-
-.card:hover {
-  border-color: #000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
-}
-
-[data-theme="dark"] .card {
-  background: #111;
-  border-color: #333;
-}
-
-[data-theme="dark"] .card:hover {
-  border-color: #666;
-  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
-}
-
 .cardTop {
   flex: 1;
   display: flex;
@@ -1734,32 +1758,37 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 500;
   white-space: nowrap;
   flex-shrink: 0;
+  border: 1px solid;
 }
 
 .statusBadge[data-active="true"] {
-  background: #e6f7ed;
-  color: #059669;
+  background: #000;
+  color: #fff;
+  border-color: #000;
 }
 
 .statusBadge[data-active="false"] {
-  background: #fee;
-  color: #dc2626;
+  background: #fafafa;
+  color: #666;
+  border-color: #eaeaea;
 }
 
 [data-theme="dark"] .statusBadge[data-active="true"] {
-  background: rgba(5, 150, 105, 0.1);
-  color: #34d399;
+  background: #fff;
+  color: #000;
+  border-color: #fff;
 }
 
 [data-theme="dark"] .statusBadge[data-active="false"] {
-  background: rgba(220, 38, 38, 0.1);
-  color: #f87171;
+  background: #111;
+  color: #888;
+  border-color: #333;
 }
 
 .subdomainUrl {
@@ -1837,44 +1866,42 @@
   border-radius: 6px;
   color: #666;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
 }
 
 .iconButton:hover {
-  background: #f5f5f5;
+  background: #fafafa;
   border-color: #000;
   color: #000;
 }
 
 .iconButtonDanger {
-  border-color: #fee;
-  color: #dc2626;
+  color: #666;
 }
 
 .iconButtonDanger:hover {
-  background: #fee;
-  border-color: #dc2626;
-  color: #dc2626;
+  background: #fafafa;
+  border-color: #000;
+  color: #000;
 }
 
 [data-theme="dark"] .iconButton {
   border-color: #333;
-  color: #999;
+  color: #888;
 }
 
 [data-theme="dark"] .iconButton:hover {
-  background: #1a1a1a;
+  background: #111;
   border-color: #666;
   color: #fff;
 }
 
 [data-theme="dark"] .iconButtonDanger {
-  border-color: rgba(220, 38, 38, 0.2);
-  color: #f87171;
+  color: #888;
 }
 
 [data-theme="dark"] .iconButtonDanger:hover {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: #dc2626;
-  color: #f87171;
+  background: #111;
+  border-color: #666;
+  color: #fff;
 }
